@@ -11,4 +11,12 @@ skills-lock.json
 .DS_Store
 *.log
 
+coverage/
+
 generated/
+
+uploads/*
+!uploads/.gitkeep
+
+report-assets/pdf-preview/
+report-assets/Software_Testing_Report.pdf
