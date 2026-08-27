@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campus Lost &amp; Found</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #dde1e6;
+    --text: #1c2530;
+    --muted: #5b6570;
+    --accent: #2f6f4f;
+    --accent-dark: #234f38;
+    --danger: #b3413a;
+    --warn: #a3730f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  header .actor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  select, input, textarea, button {
+    font-family: inherit;
+    font-size: 14px;
+  }
+  select, input, textarea {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text);
+  }
+  textarea { resize: vertical; }
+  nav {
+    display: flex;
+    gap: 4px;
+    padding: 10px 20px 0;
+  }
+  nav button {
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: #eceff2;
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+  }
+  nav button.active {
+    background: var(--card);
+    color: var(--text);
+    font-weight: 600;
+  }
+  main {
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .panel {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0 8px 8px 8px;
+    padding: 20px;
+  }
+  .panel.active { display: block; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button.primary:hover { background: var(--accent-dark); }
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  button.reject { border-color: var(--danger); color: var(--danger); background: transparent; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+  button.warn { border-color: var(--warn); color: var(--warn); background: transparent; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+  h2 { font-size: 16px; margin: 0 0 12px; }
+  h3 { font-size: 14px; margin: 20px 0 8px; color: var(--muted); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { color: var(--muted); font-weight: 600; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge.OPEN { background: #e4f1ea; color: var(--accent-dark); }
+  .badge.CLAIM_IN_PROGRESS { background: #fdf1dc; color: var(--warn); }
+  .badge.RESOLVED { background: #dce7fb; color: #2a4d8f; }
+  .badge.PENDING { background: #fdf1dc; color: var(--warn); }
+  .badge.APPROVED { background: #e4f1ea; color: var(--accent-dark); }
+  .badge.REJECTED { background: #fbe2df; color: var(--danger); }
+  .badge.INFO_REQUESTED { background: #eee; color: var(--muted); }
+  .badge.STRONG_MATCH { background: #e4f1ea; color: var(--accent-dark); }
+  .badge.POSSIBLE_MATCH { background: #fdf1dc; color: var(--warn); }
+  .badge.WEAK_MATCH { background: #fbe2df; color: var(--danger); }
+  .muted { color: var(--muted); font-size: 12px; }
+  .empty { color: var(--muted); font-style: italic; padding: 12px 0; }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    max-width: 360px;
+  }
+  .toast.show { opacity: 1; }
+  .breakdown-list { list-style: none; padding: 0; margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+  .breakdown-list li { display: flex; justify-content: space-between; }
+
+  /* --- Home landing tab --- */
+  :root {
+    --home-bg: #f7ede0;
+    --home-card: #ffffff;
+    --home-text: #2b2117;
+    --home-muted: #7a6f62;
+    --home-accent: #a8462f;
+    --home-accent-dark: #833523;
+    --home-eyebrow: #b0472e;
+  }
+  #panel-home { background: var(--home-bg); margin: -20px -20px 0; padding: 32px 20px 40px; border-radius: 0 0 16px 16px; }
+  .home-inner { max-width: 1100px; margin: 0 auto; }
+  .home-topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+  .home-eyebrow { color: var(--home-eyebrow); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .home-login-links { display: flex; gap: 18px; }
+  .home-login-links button { background: none; border: none; color: var(--home-text); font-size: 14px; font-weight: 600; cursor: pointer; padding: 0; }
+  .home-login-links button:hover { color: var(--home-accent); }
+  .home-hero h1 { font-size: 44px; font-weight: 800; color: var(--home-text); margin: 0 0 14px; letter-spacing: -0.01em; }
+  .home-hero p { color: var(--home-muted); font-size: 15px; max-width: 560px; line-height: 1.5; margin: 0 0 24px; }
+  .home-search { display: flex; gap: 10px; max-width: 720px; margin-bottom: 32px; }
+  .home-search input { flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; }
+  .home-search button { background: var(--home-accent); color: #fff; border: none; padding: 0 22px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+  .home-search button:hover { background: var(--home-accent-dark); }
+  .home-section-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .home-section-head h2 { font-size: 22px; margin: 4px 0 0; color: var(--home-text); }
+  .home-type-toggle { display: flex; gap: 6px; }
+  .home-type-toggle button { border: 1px solid var(--border); background: #fff; color: var(--home-muted); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .home-type-toggle button.active { background: var(--home-text); color: #fff; border-color: var(--home-text); }
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .item-card { background: var(--home-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .item-card-img { height: 130px; background: linear-gradient(135deg, #e7cba8, #cfa877); position: relative; display: flex; align-items: flex-end; padding: 10px; }
+  .item-card-img span { background: rgba(255,255,255,0.9); color: var(--home-text); font-size: 11px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
+  .item-card-body { padding: 12px 14px 16px; }
+  .item-card-cat { color: var(--home-eyebrow); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+  .item-card-title { font-weight: 700; color: var(--home-text); margin-bottom: 6px; }
+  .item-card-loc { color: var(--home-muted); font-size: 13px; margin-bottom: 2px; }
+  .item-card-date { color: var(--home-muted); font-size: 12px; }
+  .home-empty { color: var(--home-muted); font-size: 14px; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Campus Lost &amp; Found</h1>
+  <div class="actor">
+    <label for="actorSelect">Acting as</label>
+    <select id="actorSelect"></select>
+    <span id="actorRole" class="badge"></span>
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="home">Home</button>
+  <button class="tab-btn" data-tab="report">Report Item</button>
+  <button class="tab-btn" data-tab="matches">Matches</button>
+  <button class="tab-btn" data-tab="claims">Claims</button>
+  <button class="tab-btn" data-tab="auditlog">Audit Log</button>
+</nav>
+
+<main>
+
+  <section id="panel-home" class="panel active">
+    <div class="home-inner">
+      <div class="home-topbar">
+        <span class="home-eyebrow">Campus Lost &amp; Found</span>
+        <div class="home-login-links">
+          <button type="button" id="studentLoginBtn">Student Login</button>
+          <button type="button" id="staffLoginBtn">Staff Login</button>
+        </div>
+      </div>
+      <div class="home-hero">
+        <h1>Find what you lost.</h1>
+        <p>Browse recently reported items around campus. You can view item details without logging in.</p>
+      </div>
+      <div class="home-search">
+        <input type="text" id="homeSearchInput" placeholder="Search by item, category, or location..." />
+        <button type="button" id="homeSearchBtn">Search</button>
+      </div>
+      <div class="home-section-head">
+        <div>
+          <span class="home-eyebrow">Recently Reported</span>
+          <h2 id="homeSectionTitle">Lost Items</h2>
+        </div>
+        <div class="home-type-toggle">
+          <button type="button" class="active" data-home-type="LOST">Lost Items</button>
+          <button type="button" data-home-type="FOUND">Found Items</button>
+        </div>
+      </div>
+      <div id="homeGrid" class="home-grid"></div>
+    </div>
+  </section>
+
+  <section id="panel-report" class="panel">
+    <div class="grid">
+      <div>
+        <h2>Report a Lost or Found Item</h2>
+        <form id="reportForm">
+          <div class="row">
+            <div class="field">
+              <label>Report Type</label>
+              <select name="reportType" required>
+                <option value="LOST">Lost</option>
+                <option value="FOUND">Found</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Category</label>
+              <select name="categoryId" id="categorySelect" required></select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title</label>
+            <input name="title" placeholder="e.g. Black Backpack" required maxlength="120" />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea name="description" rows="3" placeholder="Distinguishing details, contents, condition..." required></textarea>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Color (optional)</label>
+              <input name="color" maxlength="50" />
+            </div>
+            <div class="field">
+              <label>Brand (optional)</label>
+              <input name="brand" maxlength="50" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Location</label>
+              <input name="location" placeholder="e.g. Library 2nd Floor" required maxlength="200" />
+            </div>
+            <div class="field">
+              <label>Date &amp; time seen</label>
+              <input name="occurredAt" type="datetime-local" required />
+            </div>
+          </div>
+          <button class="primary" type="submit">Save Report</button>
+        </form>
+      </div>
+      <div>
+        <h2>All Reports</h2>
+        <div id="reportList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-matches" class="panel">
+    <h2>Find Matches for a Report</h2>
+    <div class="field" style="max-width: 480px;">
+      <label>Select a report</label>
+      <select id="matchReportSelect"></select>
+    </div>
+    <div id="matchResults"></div>
+  </section>
+
+  <section id="panel-claims" class="panel">
+    <div class="grid">
+      <div>
+        <h2>Submit a Claim</h2>
+        <form id="claimForm">
+          <div class="field">
+            <label>Lost report</label>
+            <select name="lostReportId" id="claimLostSelect" required></select>
+          </div>
+          <div class="field">
+            <label>Found report</label>
+            <select name="foundReportId" id="claimFoundSelect" required></select>
+          </div>
+          <div class="field">
+            <label>Supporting evidence (min 10 characters)</label>
+            <textarea name="evidenceDescription" rows="3" placeholder="Describe proof of ownership..." required></textarea>
+          </div>
+          <button class="primary" type="submit">Submit Claim</button>
+        </form>
+      </div>
+      <div>
+        <h2>Claims</h2>
+        <div id="claimList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-auditlog" class="panel">
+    <h2>Audit Log</h2>
+    <p class="muted">Admin-only view of report, claim submission, and claim decision activity.</p>
+    <div id="auditLogList"></div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const state = { users: [], categories: [], reports: [], claims: [], homeType: "LOST", homeQuery: "" };
+
+function actor() {
+  const id = document.getElementById("actorSelect").value;
+  return state.users.find((u) => u.id === id);
+}
+
+function authHeaders() {
+  const a = actor();
+  return a ? { "x-user-id": a.id } : {};
+}
+
+function showToast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove("show"), 3500);
+}
+
+async function api(path, options = {}) {
+  const res = await fetch("/api" + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = body.details ? " (" + body.details.join("; ") + ")" : "";
+    throw new Error((body.message || res.statusText) + detail);
+  }
+  return body.data;
+}
+
+function fmtDate(iso) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleString();
+}
+
+function badge(value) {
+  return '<span class="badge ' + value + '">' + value.replace(/_/g, " ") + "</span>";
+}
+
+// --- Tabs ---
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+});
+
+// --- Actor ---
+async function loadUsers() {
+  state.users = await api("/users");
+  const select = document.getElementById("actorSelect");
+  select.innerHTML = state.users
+    .map((u) => '<option value="' + u.id + '">' + u.displayName + " (" + u.role + ")</option>")
+    .join("");
+  select.addEventListener("change", () => {
+    document.getElementById("actorRole").textContent = actor() ? actor().role : "";
+    renderClaimList();
+    loadAuditLog();
+  });
+  if (state.users.length) {
+    document.getElementById("actorRole").textContent = actor().role;
+  }
+}
+
+// --- Categories ---
+async function loadCategories() {
+  state.categories = await api("/categories");
+  document.getElementById("categorySelect").innerHTML = state.categories
+    .map((c) => '<option value="' + c.id + '">' + c.name + "</option>")
+    .join("");
+}
+
+// --- Reports ---
+async function loadReports() {
+  state.reports = await api("/reports");
+  renderReportList();
+  renderMatchReportSelect();
+  renderClaimReportSelects();
+  renderHomeGrid();
+}
+
+// --- Home ---
+function renderHomeGrid() {
+  const grid = document.getElementById("homeGrid");
+  const query = state.homeQuery.trim().toLowerCase();
+
+  const items = state.reports
+    .filter((r) => r.reportType === state.homeType && r.status === "OPEN")
+    .filter((r) => {
+      if (!query) return true;
+      const haystack = [r.title, r.location, r.category ? r.category.name : ""].join(" ").toLowerCase();
+      return haystack.includes(query);
+    })
+    .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
+
+  document.getElementById("homeSectionTitle").textContent =
+    state.homeType === "LOST" ? "Lost Items" : "Found Items";
+
+  if (!items.length) {
+    grid.innerHTML = '<p class="home-empty">No items found.</p>';
+    return;
+  }
+
+  grid.innerHTML = items
+    .map(
+      (r) =>
+        '<div class="item-card">' +
+        '<div class="item-card-img"><span>' +
+        (r.category ? r.category.name : "Item") +
+        "</span></div>" +
+        '<div class="item-card-body">' +
+        '<div class="item-card-cat">' +
+        (r.category ? r.category.name : "") +
+        "</div>" +
+        '<div class="item-card-title">' +
+        r.title +
+        "</div>" +
+        '<div class="item-card-loc">📍 ' +
+        r.location +
+        "</div>" +
+        '<div class="item-card-date">' +
+        fmtDate(r.occurredAt) +
+        "</div>" +
+        "</div></div>"
+    )
+    .join("");
+}
+
+document.getElementById("homeSearchBtn").addEventListener("click", () => {
+  state.homeQuery = document.getElementById("homeSearchInput").value;
+  renderHomeGrid();
+});
+document.getElementById("homeSearchInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    state.homeQuery = e.target.value;
+    renderHomeGrid();
+  }
+});
+document.querySelectorAll("[data-home-type]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-home-type]").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.homeType = btn.dataset.homeType;
+    renderHomeGrid();
+  });
+});
+
+function switchTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+  document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add("active");
+  document.getElementById("panel-" + tab).classList.add("active");
+}
+
+function loginAs(role, tab) {
+  const user = state.users.find((u) => u.role === role);
+  if (!user) {
+    showToast("No " + role.toLowerCase() + " user found in seed data.");
+    return;
+  }
+  const select = document.getElementById("actorSelect");
+  select.value = user.id;
+  select.dispatchEvent(new Event("change"));
+  showToast("Signed in as " + user.displayName + " (" + role + ")");
+  switchTab(tab);
+}
+
+document.getElementById("studentLoginBtn").addEventListener("click", () => loginAs("STUDENT", "report"));
+document.getElementById("staffLoginBtn").addEventListener("click", () => loginAs("STAFF", "claims"));
+
+// --- Audit Log ---
+async function loadAuditLog() {
+  const el = document.getElementById("auditLogList");
+  const current = actor();
+  if (!current || current.role !== "ADMIN") {
+    el.innerHTML = '<p class="empty">Admin access required to view the audit log.</p>';
+    return;
+  }
+  try {
+    const logs = await api("/audit-logs");
+    renderAuditLogList(logs);
+  } catch (err) {
+    el.innerHTML = '<p class="empty">Error: ' + err.message + "</p>";
+  }
+}
+
+function renderAuditLogList(logs) {
+  const el = document.getElementById("auditLogList");
+  if (!logs.length) {
+    el.innerHTML = '<p class="empty">No audit log entries yet.</p>';
+    return;
+  }
+  el.innerHTML =
+    '<table><thead><tr><th>Time</th><th>Action</th><th>Actor</th><th>Claim</th><th>Details</th></tr></thead><tbody>' +
+    logs
+      .map(
+        (log) =>
+          "<tr><td>" +
+          fmtDate(log.createdAt) +
+          "</td><td>" +
+          badge(log.action) +
+          "</td><td>" +
+          (log.actor ? log.actor.displayName : "-") +
+          "</td><td>" +
+          (log.claim ? badge(log.claim.status) : "-") +
+          "</td><td class='muted'>" +
+          (log.metadata ? JSON.stringify(log.metadata) : "") +
+          "</td></tr>"
+      )
+      .join("") +
+    "</tbody></table>";
+}
+
+function renderReportList() {
+  const el = document.getElementById("reportList");
+  if (!state.reports.length) {
+    el.innerHTML = '<p class="empty">No reports yet.</p>';
+    return;
+  }
+  el.innerHTML =
+    '<table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Location</th><th>Reported by</th></tr></thead><tbody>' +
+    state.reports
+      .map(
+        (r) =>
+          "<tr><td><strong>" +
+          r.title +
+          "</strong><div class='muted'>" +
+          fmtDate(r.occurredAt) +
+          "</div></td><td>" +
+          r.reportType +
+          "</td><td>" +
+          badge(r.status) +
+          "</td><td>" +
+          r.location +
+          "</td><td>" +
+          (r.createdBy ? r.createdBy.displayName : "-") +
+          "</td></tr>"
+      )
+      .join("") +
+    "</tbody></table>";
+}
+
+function reportLabel(r) {
+  return "[" + r.reportType + "] " + r.title + " — " + r.location;
+}
+
+function renderMatchReportSelect() {
+  const select = document.getElementById("matchReportSelect");
+  const prev = select.value;
+  select.innerHTML =
+    '<option value="">-- choose a report --</option>' +
+    state.reports.map((r) => '<option value="' + r.id + '">' + reportLabel(r) + "</option>").join("");
+  if (prev) select.value = prev;
+}
+
+function renderClaimReportSelects() {
+  const lostSelect = document.getElementById("claimLostSelect");
+  const foundSelect = document.getElementById("claimFoundSelect");
+  const lost = state.reports.filter((r) => r.reportType === "LOST");
+  const found = state.reports.filter((r) => r.reportType === "FOUND");
+  lostSelect.innerHTML = lost.map((r) => '<option value="' + r.id + '">' + reportLabel(r) + "</option>").join("");
+  foundSelect.innerHTML = found.map((r) => '<option value="' + r.id + '">' + reportLabel(r) + "</option>").join("");
+}
+
+document.getElementById("reportForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  if (!data.color) delete data.color;
+  if (!data.brand) delete data.brand;
+  try {
+    await api("/reports", { method: "POST", body: JSON.stringify(data) });
+    showToast("Report saved.");
+    form.reset();
+    await loadReports();
+  } catch (err) {
+    showToast("Error: " + err.message);
+  }
+});
+
+// --- Matches ---
+document.getElementById("matchReportSelect").addEventListener("change", async (e) => {
+  const id = e.target.value;
+  const el = document.getElementById("matchResults");
+  if (!id) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = '<p class="empty">Loading...</p>';
+  try {
+    const matches = await api("/reports/" + id + "/matches");
+    if (!matches.length) {
+      el.innerHTML = '<p class="empty">No open matches found.</p>';
+      return;
+    }
+    el.innerHTML =
+      '<table><thead><tr><th>Candidate</th><th>Score</th><th>Result</th><th>Breakdown</th></tr></thead><tbody>' +
+      matches
+        .map(
+          (m) =>
+            "<tr><td><strong>" +
+            m.report.title +
+            "</strong><div class='muted'>" +
+            m.report.location +
+            " · " +
+            fmtDate(m.report.occurredAt) +
+            "</div></td><td>" +
+            m.score +
+            " / 100</td><td>" +
+            badge(m.result) +
+            "</td><td><ul class='breakdown-list'>" +
+            Object.entries(m.breakdown)
+              .map(([k, v]) => "<li><span>" + k + "</span><span>" + v + "</span></li>")
+              .join("") +
+            "</ul></td></tr>"
+        )
+        .join("") +
+      "</tbody></table>";
+  } catch (err) {
+    el.innerHTML = '<p class="empty">Error: ' + err.message + "</p>";
+  }
+});
+
+// --- Claims ---
+async function loadClaims() {
+  state.claims = await api("/claims");
+  renderClaimList();
+}
+
+function renderClaimList() {
+  const el = document.getElementById("claimList");
+  if (!state.claims.length) {
+    el.innerHTML = '<p class="empty">No claims yet.</p>';
+    return;
+  }
+  const isStaff = actor() && (actor().role === "STAFF" || actor().role === "ADMIN");
+  el.innerHTML = state.claims
+    .map((c) => {
+      const decisionButtons =
+        isStaff && c.status === "PENDING"
+          ? '<div style="margin-top:8px; display:flex; gap:8px; align-items:center;">' +
+            '<label style="font-size:12px;"><input type="checkbox" class="verify-cb" /> staff verified evidence</label>' +
+            '<button class="ghost" data-action="APPROVE" data-id="' +
+            c.id +
+            '">Approve</button>' +
+            '<button class="warn" data-action="REQUEST_INFO" data-id="' +
+            c.id +
+            '">Request Info</button>' +
+            '<button class="reject" data-action="REJECT" data-id="' +
+            c.id +
+            '">Reject</button>' +
+            "</div>"
+          : "";
+      return (
+        '<div style="border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px;">' +
+        "<div style='display:flex; justify-content:space-between;'><strong>" +
+        c.lostReport.title +
+        " ↔ " +
+        c.foundReport.title +
+        "</strong>" +
+        badge(c.status) +
+        "</div>" +
+        "<div class='muted'>Match score: " +
+        c.matchScore +
+        " / 100 · Claimant: " +
+        c.claimant.displayName +
+        "</div>" +
+        "<div style='margin-top:6px;'>" +
+        c.evidenceDescription +
+        "</div>" +
+        (c.decisionReason
+          ? "<div class='muted' style='margin-top:6px;'>Decision: " + c.decisionReason + "</div>"
+          : "") +
+        decisionButtons +
+        "</div>"
+      );
+    })
+    .join("");
+
+  el.querySelectorAll("button[data-action]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const card = btn.closest("div[style]");
+      const verified = card.querySelector(".verify-cb")?.checked || false;
+      try {
+        await api("/claims/" + btn.dataset.id + "/decision", {
+          method: "PATCH",
+          body: JSON.stringify({ action: btn.dataset.action, staffVerifiedEvidence: verified }),
+        });
+        showToast("Claim updated.");
+        await Promise.all([loadClaims(), loadReports()]);
+      } catch (err) {
+        showToast("Error: " + err.message);
+      }
+    });
+  });
+}
+
+document.getElementById("claimForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+  try {
+    await api("/claims", { method: "POST", body: JSON.stringify(data) });
+    showToast("Claim submitted.");
+    form.reset();
+    await Promise.all([loadClaims(), loadReports()]);
+  } catch (err) {
+    showToast("Error: " + err.message);
+  }
+});
+
+// --- Init ---
+(async function init() {
+  await loadUsers();
+  await loadCategories();
+  await loadReports();
+  await loadClaims();
+  await loadAuditLog();
+})();
+</script>
+</body>
+</html>

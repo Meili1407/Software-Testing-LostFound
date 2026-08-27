@@ -1,0 +1,22 @@
+digraph scoreLocation {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fillcolor="#f5f6f8", fontname="Helvetica", fontsize=11, margin="0.15,0.1"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  N1 [label="1: a = normalizeText(locationA)\nb = normalizeText(locationB)"];
+  N2 [label="2: !a || !b"];
+  N3 [label="3: return 0"];
+  N4 [label="4: a === b"];
+  N5 [label="5: return WEIGHTS.location (10)"];
+  N6 [label="6: a.includes(b) || b.includes(a)"];
+  N7 [label="7: return round(10 * 0.5) = 5"];
+  N8 [label="8: return 0"];
+
+  N1 -> N2;
+  N2 -> N3 [label="True"];
+  N2 -> N4 [label="False"];
+  N4 -> N5 [label="True"];
+  N4 -> N6 [label="False"];
+  N6 -> N7 [label="True"];
+  N6 -> N8 [label="False"];
+}

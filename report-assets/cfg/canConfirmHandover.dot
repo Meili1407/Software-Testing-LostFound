@@ -1,0 +1,16 @@
+digraph canConfirmHandover {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fillcolor="#f5f6f8", fontname="Helvetica", fontsize=11, margin="0.15,0.1"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  N1 [label="1: status !== APPROVED"];
+  N2 [label="2: throw ValidationError\n(must be APPROVED first)"];
+  N3 [label="3: !verifiedIdentity"];
+  N4 [label="4: throw ValidationError\n(identity not verified)"];
+  N5 [label="5: return true"];
+
+  N1 -> N2 [label="True"];
+  N1 -> N3 [label="False"];
+  N3 -> N4 [label="True"];
+  N3 -> N5 [label="False"];
+}
