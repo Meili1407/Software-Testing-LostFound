@@ -1,0 +1,119 @@
+digraph StudentUserFlow {
+  rankdir=TB;
+  splines=ortho;
+  bgcolor="white";
+  node [fontname="Helvetica", fontsize=12];
+  edge [fontname="Helvetica", fontsize=10];
+
+  start [shape=circle, style=filled, fillcolor=black, label="", width=0.25, height=0.25];
+  home [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Home (/)\nPublic browse, no sign-in needed"];
+
+  actingAs [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Acting as = STUDENT?\n(\"Acting as\" selector)"];
+  restrictedNote [shape=box, style="rounded,filled", fillcolor="#fbe2df", label="Student / Notifications tabs hidden.\nDirect /student URL -> \"Restricted\" page"];
+
+  homeChoice [shape=diamond, style=filled, fillcolor="#fdf1dc", label="What does the\nstudent click?"];
+
+  reportLostBtn [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"I lost something\"\nbutton"];
+  studentTab [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Student\" nav tab"];
+  foundItemsTab [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Found Items\" nav tab"];
+  trackTab [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Track Claim\" nav tab"];
+  notifTab [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Notifications\" nav tab"];
+
+  reportForm [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Report a Lost Item form\n(/student/report-lost)\ntitle, description, color, brand,\nlocation, date/time, photo"];
+  reportValid [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Required fields\nfilled & valid?"];
+  reportError [shape=box, style="rounded,filled", fillcolor="#fbe2df", label="Browser blocks submit,\nshows \"Please fill out this field\""];
+  reportSaved [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="POST /api/reports\nReport saved (status = OPEN)"];
+
+  matchResults [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Match Results (/matches/:id)\nRanked candidates + score breakdown"];
+  matchChoice [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Student action\non a candidate?"];
+  matchConfirm [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"This is a match\"\n-> POST /matches/decision (CONFIRMED)\nOwner gets a notification"];
+  matchDismiss [shape=box, style="rounded,filled", fillcolor="#fbe2df", label="\"Not a match\"\n-> POST /matches/decision (DISMISSED)\nCandidate removed from future lists"];
+  matchNone [shape=box, style="rounded,filled", fillcolor="#eee", label="No action\n(just browsing scores)"];
+
+  submitClaimBtn [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Submit a Claim\"\n(pre-fills lost + found report IDs)"];
+  claimForm [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Submit a Claim form\n(/claims/submit)\nevidence text (>=10 chars), optional photo"];
+  claimValid [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Evidence\n>= 10 characters?"];
+  claimError [shape=box, style="rounded,filled", fillcolor="#fbe2df", label="Browser blocks submit,\nshows character-count warning"];
+  claimSaved [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="POST /api/claims\nClaim created (status = PENDING)\nBoth reports -> CLAIM_IN_PROGRESS"];
+  trackByCode [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Redirected to Track Claim\n(/claims/track?code=CLM-xxxxx)"];
+
+  studentDash [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Student Dashboard (/student)\nQuick Actions + Your Lost Reports + Recent Claims"];
+  dashChoice [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Quick Action\nclicked?"];
+
+  foundItemsPage [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Found Items (/found-items)\nSearch + category filter, browse grid"];
+  foundDetail [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Found Item Detail\n(/found-items/:id)"];
+  looksLikeMine [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"This looks like mine —\nSubmit a Claim\""];
+
+  trackForm [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Track Claim Status\n(/claims/track)\nenter CLM-xxxxx code"];
+  trackFound [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Code found &\naccessible to this user?"];
+  trackResult [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="Claim card: status, score,\nevidence, decision reason"];
+  trackNotFound [shape=box, style="rounded,filled", fillcolor="#fbe2df", label="\"Could not find that claim.\""];
+
+  notifPage [shape=box, style="rounded,filled", fillcolor="#f5f6f8", label="Notifications (/notifications)\nmatch confirmed, claim approved/\nrejected/info-requested, handover ready"];
+  notifChoice [shape=diamond, style=filled, fillcolor="#fdf1dc", label="Mark read?"];
+  notifOne [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Mark read\" on one item"];
+  notifAll [shape=box, style="rounded,filled", fillcolor="#e4f1ea", label="\"Mark all read\""];
+
+  end [shape=circle, style=filled, fillcolor=black, label="", width=0.25, height=0.25, peripheries=2];
+
+  start -> home;
+  home -> actingAs;
+  actingAs -> restrictedNote [label="No (Staff/Admin/none)"];
+  restrictedNote -> end;
+  actingAs -> homeChoice [label="Yes"];
+
+  homeChoice -> reportLostBtn [label="\"I lost something\""];
+  homeChoice -> studentTab [label="\"Student\""];
+  homeChoice -> foundItemsTab [label="\"Found Items\""];
+  homeChoice -> trackTab [label="\"Track Claim\""];
+  homeChoice -> notifTab [label="\"Notifications\""];
+
+  reportLostBtn -> reportForm;
+  reportForm -> reportValid;
+  reportValid -> reportError [label="No"];
+  reportError -> reportForm;
+  reportValid -> reportSaved [label="Yes"];
+  reportSaved -> matchResults [label="auto-redirect"];
+
+  matchResults -> matchChoice;
+  matchChoice -> matchConfirm [label="Confirm"];
+  matchChoice -> matchDismiss [label="Dismiss"];
+  matchChoice -> matchNone [label="Browse only"];
+  matchConfirm -> matchResults [label="stay on page"];
+  matchDismiss -> matchResults [label="stay on page"];
+  matchNone -> submitClaimBtn;
+  matchConfirm -> submitClaimBtn;
+
+  submitClaimBtn -> claimForm;
+  claimForm -> claimValid;
+  claimValid -> claimError [label="No"];
+  claimError -> claimForm;
+  claimValid -> claimSaved [label="Yes"];
+  claimSaved -> trackByCode;
+  trackByCode -> end;
+
+  studentTab -> studentDash;
+  studentDash -> dashChoice;
+  dashChoice -> reportForm [label="Report Lost Item"];
+  dashChoice -> foundItemsPage [label="Browse Found Items"];
+  dashChoice -> trackForm [label="Track a Claim"];
+
+  foundItemsTab -> foundItemsPage;
+  foundItemsPage -> foundDetail [label="click an item"];
+  foundDetail -> looksLikeMine;
+  looksLikeMine -> claimForm;
+
+  trackTab -> trackForm;
+  trackForm -> trackFound;
+  trackFound -> trackResult [label="Yes"];
+  trackFound -> trackNotFound [label="No"];
+  trackResult -> end;
+  trackNotFound -> trackForm;
+
+  notifTab -> notifPage;
+  notifPage -> notifChoice;
+  notifChoice -> notifOne [label="One item"];
+  notifChoice -> notifAll [label="All"];
+  notifOne -> notifPage;
+  notifAll -> notifPage;
+}
