@@ -1,7 +1,4 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
-import { verifyOwnership } from '../../src/claims/verifyOwnership.js';
-import type { ClaimRequest } from '../../src/types/claim.js';
+const { verifyOwnership } = require('../../src/claims/verifyOwnership.js');
 
 describe('verifyOwnership', () => {
   it('should return false for no evidence', () => {
@@ -12,11 +9,11 @@ describe('verifyOwnership', () => {
       status: 'PENDING',
       evidence: [],
       submittedAt: new Date()
-    } as ClaimRequest;
+    };
 
     const result = verifyOwnership(claim);
-    assert.strictEqual(result.isSufficient, false);
-    assert.strictEqual(result.score, 0);
+    expect(result.isSufficient).toBe(false);
+    expect(result.score).toBe(0);
   });
 
   it('should return true for SERIAL_NUMBER evidence', () => {
@@ -33,11 +30,11 @@ describe('verifyOwnership', () => {
         submittedAt: new Date()
       }],
       submittedAt: new Date()
-    } as ClaimRequest;
+    };
 
     const result = verifyOwnership(claim);
-    assert.strictEqual(result.isSufficient, true);
-    assert.strictEqual(result.score, 50);
+    expect(result.isSufficient).toBe(true);
+    expect(result.score).toBe(50);
   });
 
   it('should return true for combined PHOTO and IDENTIFYING_MARKS (50 pts)', () => {
@@ -63,11 +60,11 @@ describe('verifyOwnership', () => {
         }
       ],
       submittedAt: new Date()
-    } as ClaimRequest;
+    };
 
     const result = verifyOwnership(claim);
-    assert.strictEqual(result.isSufficient, true);
-    assert.strictEqual(result.score, 50); // 30 + 20
+    expect(result.isSufficient).toBe(true);
+    expect(result.score).toBe(50); // 30 + 20
   });
 
   it('should return false for only IDENTIFYING_MARKS (20 pts)', () => {
@@ -84,10 +81,10 @@ describe('verifyOwnership', () => {
         submittedAt: new Date()
       }],
       submittedAt: new Date()
-    } as ClaimRequest;
+    };
 
     const result = verifyOwnership(claim);
-    assert.strictEqual(result.isSufficient, false);
-    assert.strictEqual(result.score, 20);
+    expect(result.isSufficient).toBe(false);
+    expect(result.score).toBe(20);
   });
 });

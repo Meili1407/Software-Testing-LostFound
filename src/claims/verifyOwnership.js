@@ -1,14 +1,6 @@
-import type { ClaimRequest } from "../types/claim.js";
-
-export interface OwnershipVerificationResult {
-  isSufficient: boolean;
-  score: number;
-  messages: string[];
-}
-
-export function verifyOwnership(claim: ClaimRequest): OwnershipVerificationResult {
+function verifyOwnership(claim) {
   let score = 0;
-  const messages: string[] = [];
+  const messages = [];
 
   if (!claim.evidence || claim.evidence.length === 0) {
     return {
@@ -56,3 +48,5 @@ export function verifyOwnership(claim: ClaimRequest): OwnershipVerificationResul
     messages,
   };
 }
+
+module.exports = { verifyOwnership };
