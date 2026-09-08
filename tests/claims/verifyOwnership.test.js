@@ -87,4 +87,47 @@ describe('verifyOwnership', () => {
     expect(result.isSufficient).toBe(false);
     expect(result.score).toBe(20);
   });
+
+  it('should return false for only RECEIPT (40 pts) - Boundary Value Analysis', () => {
+    const claim = {
+      id: '1',
+      evidence: [{ evidenceType: 'RECEIPT', description: 'Store receipt' }]
+    };
+    const result = verifyOwnership(claim);
+    expect(result.isSufficient).toBe(false);
+    expect(result.score).toBe(40);
+  });
+
+  it('should return false for only PHOTO (30 pts)', () => {
+    const claim = {
+      id: '1',
+      evidence: [{ evidenceType: 'PHOTO', description: 'Item picture' }]
+    };
+    const result = verifyOwnership(claim);
+    expect(result.isSufficient).toBe(false);
+    expect(result.score).toBe(30);
+  });
+
+  it('should return true for RECEIPT and PHOTO (> 50 pts) - Boundary Value Analysis', () => {
+    const claim = {
+      id: '1',
+      evidence: [
+        { evidenceType: 'RECEIPT', description: 'Store receipt' },
+        { evidenceType: 'PHOTO', description: 'Item picture' }
+      ]
+    };
+    const result = verifyOwnership(claim);
+    expect(result.isSufficient).toBe(true);
+    expect(result.score).toBe(70);
+  });
+
+  it('should not crash and award 0 points for unknown evidence type', () => {
+    const claim = {
+      id: '1',
+      evidence: [{ evidenceType: 'UNKNOWN_TYPE', description: 'Weird evidence' }]
+    };
+    const result = verifyOwnership(claim);
+    expect(result.isSufficient).toBe(false);
+    expect(result.score).toBe(0);
+  });
 });
