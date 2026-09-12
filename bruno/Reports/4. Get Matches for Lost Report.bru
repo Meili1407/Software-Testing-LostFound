@@ -1,0 +1,21 @@
+meta {
+  name: 4. Get Matches for Lost Report
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/reports/{{lostReportId}}/matches
+  body: none
+  auth: none
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("found report appears as a candidate", function() {
+    const ids = res.body.data.map(m => m.report.id);
+    expect(ids).to.include(bru.getVar("foundReportId"));
+  });
+}

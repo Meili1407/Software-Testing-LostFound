@@ -1,0 +1,43 @@
+meta {
+  name: 2. Create Lost Report (Student)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/reports
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+body:json {
+  {
+    "reportType": "LOST",
+    "title": "Black Backpack",
+    "description": "A black leather backpack with a small tear on the front pocket",
+    "location": "Library 2nd Floor",
+    "occurredAt": "2026-08-20T10:00:00.000Z",
+    "color": "Black",
+    "brand": "Herschel",
+    "categoryId": "{{categoryId}}"
+  }
+}
+
+script:post-response {
+  if (res.body.success) {
+    bru.setVar("lostReportId", res.body.data.id);
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  test("report is OPEN", function() {
+    expect(res.body.data.status).to.equal("OPEN");
+  });
+}

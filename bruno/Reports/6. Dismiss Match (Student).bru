@@ -1,0 +1,29 @@
+meta {
+  name: 6. Dismiss Match (Student)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/reports/matches/decision
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+body:json {
+  {
+    "lostReportId": "{{lostReportId}}",
+    "foundReportId": "{{foundReportId}}",
+    "decision": "DISMISSED"
+  }
+}
+
+docs {
+  Not part of the golden-path sequence — run this on its own to see a candidate
+  disappear from "4. Get Matches for Lost Report" afterward. Re-run "5. Confirm
+  Match" to undo it before continuing the main flow.
+}

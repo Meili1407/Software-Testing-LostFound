@@ -1,0 +1,40 @@
+meta {
+  name: 3. Create Found Report (Staff)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/reports
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+body:json {
+  {
+    "reportType": "FOUND",
+    "title": "Black Backpack",
+    "description": "A black leather backpack found with a torn front pocket",
+    "location": "Library 2nd Floor",
+    "occurredAt": "2026-08-20T10:30:00.000Z",
+    "color": "Black",
+    "brand": "Herschel",
+    "categoryId": "{{categoryId}}"
+  }
+}
+
+script:post-response {
+  if (res.body.success) {
+    bru.setVar("foundReportId", res.body.data.id);
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+}

@@ -1,0 +1,20 @@
+meta {
+  name: 4. Get Claim by Code
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/claims/by-code/{{claimCode}}
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+docs {
+  claimCode looks like CLM-00007 — set automatically after running
+  "2. Submit Claim (Student)".
+}

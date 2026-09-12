@@ -1,0 +1,25 @@
+meta {
+  name: 1. Get Audit Logs (Admin)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/audit-logs
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: {{adminId}}
+}
+
+params:query {
+  ~action: CLAIM_DECIDED
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,52 @@
+PASSED matchingService: unit tests for attribute scorers scoreItemName gives full weight for an exact match (case/whitespace insensitive)
+PASSED matchingService: unit tests for attribute scorers scoreItemName gives partial credit when one name contains the other
+PASSED matchingService: unit tests for attribute scorers scoreItemName gives zero for unrelated names
+PASSED matchingService: unit tests for attribute scorers scoreItemName gives zero when either name is empty
+PASSED matchingService: unit tests for attribute scorers scoreDescription scales with word overlap (Jaccard similarity)
+PASSED matchingService: unit tests for attribute scorers scoreExactOptionalField matches case-insensitively and rewards exact match only
+PASSED matchingService: unit tests for attribute scorers scoreExactOptionalField gives zero when a field is missing on either side
+PASSED matchingService: unit tests for attribute scorers scoreLocation gives full weight for exact match and partial credit for containment
+PASSED matchingService: unit tests for attribute scorers scoreDate: boundary values at 0, 3, and 4 days apart
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(0) -> WEAK_MATCH
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(49) -> WEAK_MATCH
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(50) -> POSSIBLE_MATCH
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(74) -> POSSIBLE_MATCH
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(75) -> STRONG_MATCH
+PASSED matchingService: Boundary Value Analysis on decision thresholds classifyScore(100) -> STRONG_MATCH
+PASSED matchingService: Equivalence Partitioning on item validation accepts a fully valid item
+PASSED matchingService: Equivalence Partitioning on item validation rejects an item missing required field title
+PASSED matchingService: Equivalence Partitioning on item validation rejects an item missing required field description
+PASSED matchingService: Equivalence Partitioning on item validation rejects an item missing required field location
+PASSED matchingService: Equivalence Partitioning on item validation rejects an item missing required field occurredAt
+PASSED matchingService: Equivalence Partitioning on item validation rejects an item with an invalid occurredAt value
+PASSED matchingService: Equivalence Partitioning on item validation accepts an item with optional fields (color/brand) omitted
+PASSED matchingService: Equivalence Partitioning on item validation rejects a non-object item
+PASSED matchingService: calculateMatchScore integration identical items produce a perfect score and Strong Match
+PASSED matchingService: calculateMatchScore integration completely unrelated items produce a low score and Weak Match
+PASSED matchingService: calculateMatchScore integration partially matching items land in the Possible Match band
+PASSED matchingService: calculateMatchScore integration propagates validation errors for an invalid found item
+PASSED FR2 additional coverage: scoreItemName edge cases returns 0 when both names are empty/undefined
+PASSED FR2 additional coverage: scoreItemName edge cases treats non-string input (null/number) as an empty name, returning 0
+PASSED FR2 additional coverage: scoreDescription control-flow paths P1: both descriptions empty returns 0 (does not divide by zero)
+PASSED FR2 additional coverage: scoreDescription control-flow paths P2: one empty description and one non-empty description returns 0
+PASSED FR2 additional coverage: scoreDescription control-flow paths single shared word scores partial credit proportional to Jaccard overlap
+PASSED FR2 additional coverage: scoreDescription control-flow paths is case-insensitive and whitespace-insensitive
+PASSED FR2 additional coverage: scoreExactOptionalField edge cases returns 0 when both values are missing
+PASSED FR2 additional coverage: scoreExactOptionalField edge cases returns the exact weight passed in, including a weight of 0
+PASSED FR2 additional coverage: scoreLocation edge cases returns 0 when either location is empty/undefined
+PASSED FR2 additional coverage: scoreLocation edge cases gives partial credit regardless of which side is the longer, containing string
+PASSED FR2 additional coverage: scoreDate edge cases is symmetric regardless of argument order
+PASSED FR2 additional coverage: scoreDate edge cases accepts Date object inputs directly
+PASSED FR2 additional coverage: scoreDate edge cases degrades gracefully to 0 for an unparsable date instead of throwing
+PASSED FR2 additional coverage: scoreDate edge cases returns 0 for a large date gap well beyond the 3-day boundary
+PASSED FR2 additional coverage: classifyScore domain boundaries clamps out-of-range scores into the nearest band instead of throwing
+PASSED FR2 additional coverage: classifyScore domain boundaries honors fractional scores right at the threshold boundary
+PASSED FR2 additional coverage: validateItemForMatching edge cases rejects a non-object, non-null item (a string) with the object-type error
+PASSED FR2 additional coverage: validateItemForMatching edge cases rejects a non-object, non-null item (a number) with the object-type error
+PASSED FR2 additional coverage: validateItemForMatching edge cases an array is typeof 'object' so it passes the type check, but fails on missing fields
+PASSED FR2 additional coverage: validateItemForMatching edge cases rejects a required field that is present but an empty string
+PASSED FR2 additional coverage: validateItemForMatching edge cases reports every missing field at once, not just the first
+PASSED FR2 additional coverage: validateItemForMatching edge cases accepts a Date object (not just a date string) for occurredAt
+PASSED FR2 additional coverage: validateItemForMatching edge cases includes the caller-supplied label in the error details
+
+Total: 50 Passed: 50 Failed: 0

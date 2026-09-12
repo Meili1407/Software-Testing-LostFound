@@ -1,0 +1,33 @@
+digraph scoreDescription {
+  rankdir=TB;
+  node [shape=box, style="rounded,filled", fillcolor="#f5f6f8", fontname="Helvetica", fontsize=11, margin="0.15,0.1"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  N1 [label="1: setA = toWordSet(descA)\nsetB = toWordSet(descB)"];
+  N2 [label="2: setA.size===0 &&\nsetB.size===0"];
+  N3 [label="3: return round(25 * 0) = 0"];
+  N4 [label="4: intersectionSize = 0"];
+  N5 [label="5: has next word in setA?\n(for...of loop test)"];
+  N6 [label="6: setB.has(word)"];
+  N7 [label="7: intersectionSize += 1"];
+  N8 [label="8: unionSize = setA.size + setB.size\n- intersectionSize"];
+  N9 [label="9: unionSize === 0"];
+  N10 [label="10: similarity = 0"];
+  N11 [label="11: similarity =\nintersectionSize / unionSize"];
+  N12 [label="12: return round(25 * similarity)"];
+
+  N1 -> N2;
+  N2 -> N3 [label="True"];
+  N2 -> N4 [label="False"];
+  N4 -> N5;
+  N5 -> N6 [label="True (more words)"];
+  N6 -> N7 [label="True"];
+  N6 -> N5 [label="False"];
+  N7 -> N5;
+  N5 -> N8 [label="False (loop done)"];
+  N8 -> N9;
+  N9 -> N10 [label="True (infeasible\nvia scoreDescription)"];
+  N9 -> N11 [label="False"];
+  N10 -> N12;
+  N11 -> N12;
+}

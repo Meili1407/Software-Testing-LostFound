@@ -1,0 +1,26 @@
+meta {
+  name: 9. Staff Request More Info (alternate)
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/claims/{{claimId}}/decision
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+body:json {
+  {
+    "action": "REQUEST_INFO"
+  }
+}
+
+docs {
+  Alternate branch — not part of the main golden-path sequence. Sets the
+  claim to INFO_REQUESTED so it can be re-decided later.
+}

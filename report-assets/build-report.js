@@ -211,6 +211,42 @@ const CFG_FUNCTIONS = [
     ],
   },
   {
+    name: "scoreDescription(descA, descB)",
+    file: "scoreDescription.png",
+    module: "matchingService.js",
+    paths: [
+      ["P1", "both descriptions empty (both word sets size 0)", "N1→N2(T)→N3 (return 0)"],
+      ["P2", "one description empty, the other non-empty (loop body never runs)", "N1→N2(F)→N4→N5(F, no words)→N8→N9(F)→N11→N12"],
+      ["P3", "both non-empty, no shared words (loop runs, N6 always False)", "…→N5(T)→N6(F)→N5(loop)…→N5(F)→N8→N9(F)→N11→N12"],
+      ["P4", "both non-empty, at least one shared word (N6 True at least once)", "…→N5(T)→N6(T)→N7→N5(loop)…→N5(F)→N8→N9(F)→N11→N12"],
+      ["P5 (infeasible)", "unionSize === 0 while N2 was False", "…→N8→N9(T)→N10→N12 — cannot occur: unionSize=0 only when both sets are empty, which N2 already intercepts"],
+    ],
+    predicateUse: [
+      ["(2,3)", "setA.size===0 && setB.size===0", "True", "{setA, setB}"],
+      ["(2,4)", "setA.size===0 && setB.size===0", "False", "{setA, setB}"],
+      ["(5,6)", "next word exists in setA (loop test)", "True", "{setA}"],
+      ["(5,8)", "next word exists in setA (loop test)", "False", "{setA}"],
+      ["(6,7)", "setB.has(word)", "True", "{setB, word}"],
+      ["(6,5)", "setB.has(word)", "False", "{setB, word}"],
+      ["(9,10)", "unionSize === 0", "True", "{unionSize}"],
+      ["(9,11)", "unionSize === 0", "False", "{unionSize}"],
+    ],
+    defCUse: [
+      ["1", "{setA, setB}", "{descA, descB}"],
+      ["2", "{}", "{setA, setB}"],
+      ["3", "{}", "{}"],
+      ["4", "{intersectionSize}", "{}"],
+      ["5", "{word}", "{setA}"],
+      ["6", "{}", "{setB, word}"],
+      ["7", "{intersectionSize}", "{intersectionSize}"],
+      ["8", "{unionSize}", "{setA, setB, intersectionSize}"],
+      ["9", "{}", "{unionSize}"],
+      ["10", "{similarity}", "{}"],
+      ["11", "{similarity}", "{intersectionSize, unionSize}"],
+      ["12", "{}", "{similarity}"],
+    ],
+  },
+  {
     name: "scoreExactOptionalField(valueA, valueB, weight)",
     file: "scoreExactOptionalField.png",
     module: "matchingService.js",
@@ -416,7 +452,7 @@ children.push(
 children.push(h1("1. Introduction"));
 children.push(
   p(
-    "The Campus Lost & Found Management System helps students and staff report lost and found items, automatically compares reports using a rule-based matching algorithm, and supports staff in verifying ownership before an item is handed over. This report documents the software testing performed on the system, covering Unit Testing, Control Flow Testing, Data Flow Testing, Domain Testing, Integration Testing, and a final walkthrough mapping the implemented UI to the system's functional requirements."
+    "The Campus Lost & Found Management System helps students and staff report lost and found items, automatically compares reports using a rule-based matching algorithm, and supports staff in verifying ownership before an item is handed over. This report documents the software testing performed on the system, covering Unit Testing, Control Flow Testing, Data Flow Testing, Domain Testing, Integration Testing, Access Control Testing, and a final walkthrough mapping the implemented UI to the system's functional requirements."
   )
 );
 
@@ -451,23 +487,29 @@ children.push(p("Node.js v22.12.0, Jest 30.4.2. No mocking required — matching
 
 children.push(h2("2.2 Test Suites"));
 const suites = [
-  ["matchingService.test.js", "scoreItemName, scoreDescription, scoreExactOptionalField, scoreLocation, scoreDate, classifyScore, validateItemForMatching, calculateMatchScore", "20"],
-  ["claimService.test.js", "decideClaim (decision table), canConfirmHandover (handover eligibility)", "13"],
-  ["validation.test.js", "itemReportSchema, claimSubmissionSchema, claimDecisionSchema (equivalence partitioning)", "13"],
+  ["matchingService.test.js", "scoreItemName, scoreDescription, scoreExactOptionalField, scoreLocation, scoreDate, classifyScore, validateItemForMatching, calculateMatchScore", "50"],
+  ["claimService.test.js", "decideClaim (decision table), canConfirmHandover (handover eligibility)", "17"],
+  ["validation.test.js", "itemReportSchema, claimSubmissionSchema, claimDecisionSchema (equivalence partitioning)", "17"],
   ["notificationService.test.js", "buildNotificationMessage for all five notification types", "7"],
 ];
 children.push(table(["Test File", "Functions Covered", "Test Count"], suites, [30, 55, 15]));
 children.push(p(""));
 children.push(h2("2.3 Result"));
-children.push(...codeBlock(["Test Suites: 4 passed, 4 total", "Tests:       68 passed, 68 total", "Snapshots:   0 total", "Time:        0.29 s"]));
-children.push(p("All 68 unit tests pass. Representative test cases are summarized below; full source is in tests/*.test.js."));
+children.push(...codeBlock(["Test Suites: 4 passed, 4 total", "Tests:       91 passed, 91 total", "Snapshots:   0 total", "Time:        0.43 s"]));
+children.push(p("All 91 unit tests pass. Representative test cases are summarized below; full source is in tests/*.test.js."));
 
 const unitCases = [
   ["scoreItemName: exact match", "\"Black Backpack\" / \"black backpack\"", "25", "25", "Pass"],
   ["scoreItemName: substring match", "\"Backpack\" / \"Black Backpack\"", "15", "15", "Pass"],
   ["scoreItemName: no match", "\"Backpack\" / \"Umbrella\"", "0", "0", "Pass"],
   ["scoreDate: boundary at 3/4 days", "diff=3 → 5, diff=4 → 0", "5 / 0", "5 / 0", "Pass"],
+  ["scoreDescription: both empty (P1)", "\"\" / \"\"", "0", "0", "Pass"],
+  ["scoreDescription: one empty (P2)", "\"\" / \"black leather backpack\"", "0", "0", "Pass"],
+  ["scoreDate: unparsable date degrades to 0", "\"not-a-date\" / \"2026-08-10\"", "0", "0", "Pass"],
   ["classifyScore: threshold boundaries", "49→WEAK, 50→POSSIBLE, 74→POSSIBLE, 75→STRONG", "as listed", "as listed", "Pass"],
+  ["classifyScore: out-of-domain scores", "-10 → WEAK, 150 → STRONG", "as listed", "as listed", "Pass"],
+  ["validateItemForMatching: array input", "[] (typeof 'object', passes type check)", "throws (missing fields)", "throws (missing fields)", "Pass"],
+  ["validateItemForMatching: multiple missing fields", "title and location both undefined", "2 error details", "2 error details", "Pass"],
   ["decideClaim: weak match needs verification", "APPROVE, WEAK_MATCH, staffVerifiedEvidence=false", "throws", "throws", "Pass"],
   ["decideClaim: weak match approved once verified", "APPROVE, WEAK_MATCH, staffVerifiedEvidence=true", "APPROVED", "APPROVED", "Pass"],
   ["canConfirmHandover: blocks unapproved claim", "status=PENDING, verifiedIdentity=true", "throws", "throws", "Pass"],
@@ -486,6 +528,12 @@ children.push(
 CFG_FUNCTIONS.forEach((fn, idx) => {
   children.push(h2(`3.${idx + 1} ${fn.name}`));
   children.push(p(`Module: ${fn.module}`, { italics: true, size: 18, color: "5B6570" }));
+  children.push(
+    p(`Cyclomatic Complexity: V(G) = ${fn.paths.length} (decision points + 1 = number of independent paths)`, {
+      bold: true,
+      size: 20,
+    })
+  );
   children.push(...imagePara(path.join(CFG_DIR, fn.file), 460, `Figure: Control flow graph for ${fn.name}`));
   children.push(
     table(
@@ -494,6 +542,13 @@ CFG_FUNCTIONS.forEach((fn, idx) => {
       [10, 35, 55]
     )
   );
+  if (fn.name.startsWith("scoreDescription")) {
+    children.push(
+      p(
+        "Note: Path P5 is structurally counted toward V(G) but is infeasible when reached through scoreDescription() — unionSize can only be 0 if both word sets are empty, and that case is already intercepted earlier at node N2. This was confirmed by attempting to construct an input that reaches N9 with unionSize===0 without tripping N2, which is not possible. No defect: the dead branch is unreachable, not incorrect."
+      )
+    );
+  }
   children.push(p(""));
 });
 
@@ -662,22 +717,50 @@ children.push(
 );
 
 children.push(h2("6.3 Integration Test Results"));
+children.push(
+  p(
+    "Unlike Sections 2–5, which exercise pure functions in isolation, these scenarios are automated end-to-end: tests/integration/apiIntegration.test.js runs via `npm run test:integration` (node:test executed under tsx, since the project's Prisma client is generated as a TypeScript/ESM module) against the real Express API and PostgreSQL database — not mocks. Each IT-xx below is one automated check, so a reader can independently confirm every Pass by running the command and reading the same PASS/FAIL output shown in 6.4."
+  )
+);
 const integrationRows = [
-  ["IT-01", "Report ↔ Matching", "Create a LOST and a FOUND report with similar attributes.", "GET /reports/:id/matches returns the counterpart, scored and ranked.", "Confirmed — Blue Wallet pair scored 97/100.", "Pass"],
-  ["IT-02", "Matching ↔ MatchDecision", "Confirm a suggested match.", "Decision persists and is excluded/flagged on future fetches.", "Confirmed — badge shows CONFIRMED MATCH after reload.", "Pass"],
-  ["IT-03", "Matching ↔ Claim", "Submit a claim referencing a lost/found pair.", "Claim stores the matchScore computed at submission time.", "Confirmed — CLM-00007 stored matchScore=97.", "Pass"],
-  ["IT-04", "Claim ↔ Notification", "Staff approves/rejects/requests info on a claim.", "A Notification row is created for the claimant with the right message.", "Confirmed — see 18-notifications.png.", "Pass"],
-  ["IT-05", "Claim ↔ Report status", "Staff approves then confirms handover.", "Both linked reports move OPEN → CLAIM_IN_PROGRESS → RESOLVED.", "Confirmed — found item detail page shows RESOLVED after handover.", "Pass"],
-  ["IT-06", "Claim ↔ AuditLog", "Any claim decision or handover.", "An AuditLog row is written with the actor and outcome.", "Confirmed via GET /api/audit-logs (ADMIN only).", "Pass"],
-  ["IT-07", "Auth (actor) ↔ Route access", "Switch the acting user between STUDENT and STAFF.", "Navbar tabs and /student, /staff routes adapt to the active role.", "Confirmed — see 20/21-role-blocked screenshots.", "Pass"],
+  ["IT-01", "Report ↔ Matching", "Create a LOST and a FOUND report with matching title/description/color/brand/location/date.", "GET /reports/:id/matches returns the counterpart with matchScore ≥ 75 (STRONG_MATCH).", "Confirmed — matchScore=100, STRONG_MATCH.", "Pass"],
+  ["IT-02", "Matching ↔ MatchDecision", "Confirm the suggested match (student).", "Decision persists as CONFIRMED and is returned on the next fetch.", "Confirmed via GET /reports/:id/matches.", "Pass"],
+  ["IT-03", "Matching ↔ Claim", "Submit a claim referencing the confirmed lost/found pair.", "Claim is created with status PENDING and a generated claimNumber.", "Confirmed — claimId captured for downstream steps.", "Pass"],
+  ["IT-04", "Claim ↔ Notification", "Staff approves the claim.", "Claim status becomes APPROVED and a Notification row is created for the claimant.", "Confirmed via GET /notifications.", "Pass"],
+  ["IT-05", "Claim ↔ Report status", "Staff confirms handover on the approved claim.", "Both linked reports transition to RESOLVED.", "Confirmed — both reports RESOLVED.", "Pass"],
+  ["IT-06", "Claim ↔ AuditLog", "Submit, approve, and hand over the same claim.", "An AuditLog row exists for each of the three actions (ADMIN-only read).", "Confirmed — 3 audit log entries found for the claim.", "Pass"],
+  ["IT-07", "Role (actor) ↔ Route access", "STUDENT attempts to decide a claim; STAFF attempts to view the audit log; ADMIN views the audit log.", "403 Forbidden for both role violations; 200 OK for ADMIN.", "Confirmed — 403 / 403 / 200 as expected.", "Pass"],
 ];
 children.push(table(["ID", "Modules", "Scenario", "Expected", "Actual", "Result"], integrationRows, [8, 16, 22, 24, 22, 8]));
 children.push(p(""));
 children.push(...imagePara(path.join(SHOT_DIR, "11-staff-dashboard.png"), 500, "Figure: Staff Dashboard showing claims produced end-to-end by the integrated Report → Match → Claim pipeline."));
 
+// ---- Access Control Testing ----
+children.push(new Paragraph({ children: [new PageBreak()] }));
+children.push(h1("7. Access Control Testing"));
+children.push(
+  p(
+    "Access control is simulated via an x-user-id header (no real authentication, per the project proposal's stated out-of-scope) and enforced server-side by a requireRole middleware. These checks were exercised two independent ways: automatically inside the integration suite (IT-07 above), and manually/reproducibly via the Bruno API collection (bruno/), which any team member can re-run without reading code."
+  )
+);
+const accessControlRows = [
+  ["AC-01", "STUDENT calls PATCH /claims/:id/decision (approve/reject a claim)", "403 Forbidden — decisions are staff/admin-only.", "403, message: role not permitted.", "Pass"],
+  ["AC-02", "STAFF calls GET /audit-logs", "403 Forbidden — audit log is admin-only.", "403, message: role not permitted.", "Pass"],
+  ["AC-03", "ADMIN calls GET /audit-logs", "200 OK with the full audit trail.", "200, audit rows returned.", "Pass"],
+  ["AC-04", "STUDENT views /staff or /admin/audit-log route in the UI", "RequireRole redirects away from the page; nav does not show Staff/Audit Log tabs.", "Confirmed — see 20/21-role-blocked screenshots.", "Pass"],
+];
+children.push(table(["ID", "Scenario", "Expected", "Actual", "Result"], accessControlRows, [8, 32, 28, 22, 10]));
+children.push(p(""));
+children.push(
+  p(
+    "Evidence: automated — `npm run test:integration`, assertion block IT-07 in tests/integration/apiIntegration.test.js. Reproducible manually — Bruno collection, \"Claims → 5. Student Tries to Decide (expect 403)\" and \"Audit Log → 2. Staff Tries to View (expect 403)\", both validated via `npx @usebruno/cli run bruno --env Local -r`."
+  )
+);
+children.push(...imagePara(path.join(SHOT_DIR, "20-role-blocked-staff.png"), 500, "Figure: UI-level role gating — a non-staff actor cannot reach the Staff dashboard."));
+
 // ---- Final Test Case with FR + UI/UX ----
 children.push(new Paragraph({ children: [new PageBreak()] }));
-children.push(h1("7. Final Test Case with Functional Requirements and UI/UX"));
+children.push(h1("8. Final Test Case with Functional Requirements and UI/UX"));
 children.push(p("This section walks through the live application page by page, mapping each screen back to the functional requirements (FR1–FR5) from the project proposal."));
 
 function frSection(title, fr, desc, screenshotFile) {
@@ -750,10 +833,60 @@ frSection(
 
 // ---- Summary ----
 children.push(new Paragraph({ children: [new PageBreak()] }));
-children.push(h1("8. Summary"));
+children.push(h1("9. Summary"));
 children.push(
   p(
-    "68 unit tests, 33 independent control-flow paths across 8 functions, 13 domain test cases, 7 integration scenarios, and a 10-part functional walkthrough were executed against the running system. All results matched expectations. The rule-based matching engine, claim decision logic, and handover eligibility check — the modules identified as highest-risk in the project proposal because of their branching complexity — are fully covered by both static analysis (CFG/DFG) and live, screenshot-based evidence from the running application."
+    "91 unit tests, 38 independent control-flow paths across 9 functions, 13 domain test cases, 7 automated integration scenarios (via tsx --test against the live API and database), and a Bruno-based access-control test collection were executed against the running system. All results matched expectations. The rule-based matching engine, claim decision logic, and handover eligibility check — the modules identified as highest-risk in the project proposal because of their branching complexity — are fully covered by static analysis (CFG/DFG), automated integration tests, and live, screenshot-based evidence from the running application."
+  )
+);
+
+children.push(h2("9.1 Final Test Execution Results"));
+const finalResultsRows = [
+  ["Unit Testing", "91", "91", "0", "npx jest — see Section 2.3"],
+  ["Control Flow Testing", "38 independent paths (9 functions)", "38", "0", "All CFG paths mapped to executed unit tests — Section 3"],
+  ["Data Flow Testing", "9 functions (def/c-use/p-use)", "9", "0", "All DU-pairs exercised by the same unit tests — Section 4"],
+  ["Domain Testing", "13", "13", "0", "Manual walkthrough against the running app — Section 5"],
+  ["Integration Testing", "9 (IT-01..IT-07, incl. 3 sub-checks in IT-07)", "9", "0", "npm run test:integration — automated, reproducible"],
+  ["Access Control Testing", "4 (AC-01..AC-04) + 2 Bruno 403 checks", "6", "0", "Integration suite IT-07 + Bruno collection — Section 7"],
+];
+children.push(
+  table(
+    ["Test Type", "Cases Run", "Passed", "Failed", "Evidence"],
+    finalResultsRows,
+    [18, 24, 12, 12, 34]
+  )
+);
+children.push(p(""));
+children.push(...codeBlock([
+  "$ npm test",
+  "Test Suites: 4 passed, 4 total",
+  "Tests:       91 passed, 91 total",
+  "",
+  "$ npm run test:integration",
+  "# tests 9",
+  "# pass 9",
+  "# fail 0",
+  "",
+  "$ npx @usebruno/cli run --env Local -r",
+  "Requests      22 (22 Passed)",
+  "Tests         18/18",
+]));
+
+children.push(h2("9.2 Defects Found and Resolved"));
+const defectRows = [
+  [
+    "DEF-01",
+    "GET /api/claims/by-code/ (empty code segment) and GET /api/claims/:id with a malformed (non-UUID) id both returned an uncaught 500 Internal Server Error instead of a clean 4xx response.",
+    "The empty/invalid segment matched Express route GET /:id, which passed the string straight to Prisma; Postgres rejected it as invalid UUID syntax (Prisma error code P2007), and errorHandler.js did not recognize that code.",
+    "Fixed in src/middleware/errorHandler.js: P2007 (and P2023) are now mapped to a 404 Not Found response. Verified via curl and via the Bruno \"Get Claim by Code\" request.",
+    "Fixed",
+  ],
+];
+children.push(table(["ID", "Symptom", "Root Cause", "Resolution", "Status"], defectRows, [10, 30, 25, 25, 10]));
+children.push(p(""));
+children.push(
+  p(
+    "No other failing tests or defects were found. One control-flow observation (not a defect) was documented in Section 3.3: the unionSize===0 branch inside scoreDescription()'s CFG is structurally present but unreachable through the public function, since the only way to reach it is already intercepted by an earlier check — the code behaves correctly, it simply contains one dead branch."
   )
 );
 
