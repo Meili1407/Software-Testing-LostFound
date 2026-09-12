@@ -89,9 +89,53 @@ function code(text) {
 function codeBlock(lines) {
   return lines.map((l) => code(l));
 }
+// VS Code Dark+ theme token colors
+const SYNTAX_COLORS = {
+  default: "D4D4D4",
+  comment: "6A9955",
+  string: "CE9178",
+  number: "B5CEA8",
+  declKeyword: "569CD6", // function, const, let, var, class, async, export...
+  flowKeyword: "C586C0", // if, else, return, throw, new, for, while, switch...
+  functionCall: "DCDCAA",
+  property: "9CDCFE",
+};
+
+const TOKEN_REGEX =
+  /(\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|(\b(?:function|const|let|var|class|extends|async|await|export|import|require|module|true|false|null|undefined)\b)|(\b(?:if|else|return|throw|new|for|of|in|while|switch|case|default|break|continue|typeof|instanceof|try|catch|finally)\b)|(\.[A-Za-z_$][\w$]*)|(\b[A-Za-z_$][\w$]*\b(?=\())/g;
+
+function highlightJsLine(line) {
+  const tokens = [];
+  let lastIndex = 0;
+  let m;
+  TOKEN_REGEX.lastIndex = 0;
+  while ((m = TOKEN_REGEX.exec(line)) !== null) {
+    if (m.index > lastIndex) {
+      tokens.push({ text: line.slice(lastIndex, m.index), color: SYNTAX_COLORS.default });
+    }
+    let color = SYNTAX_COLORS.default;
+    if (m[1]) color = SYNTAX_COLORS.comment;
+    else if (m[2]) color = SYNTAX_COLORS.string;
+    else if (m[3]) color = SYNTAX_COLORS.number;
+    else if (m[4]) color = SYNTAX_COLORS.declKeyword;
+    else if (m[5]) color = SYNTAX_COLORS.flowKeyword;
+    else if (m[6]) color = SYNTAX_COLORS.property;
+    else if (m[7]) color = SYNTAX_COLORS.functionCall;
+    tokens.push({ text: m[0], color });
+    lastIndex = TOKEN_REGEX.lastIndex;
+  }
+  if (lastIndex < line.length) {
+    tokens.push({ text: line.slice(lastIndex), color: SYNTAX_COLORS.default });
+  }
+  if (tokens.length === 0) tokens.push({ text: line || " ", color: SYNTAX_COLORS.default });
+  return tokens;
+}
+
 function darkCode(text) {
+  const line = text || " ";
+  const tokens = highlightJsLine(line);
   return new Paragraph({
-    children: [new TextRun({ text: text || " ", font: "Consolas", size: 18, color: "D4D4D4" })],
+    children: tokens.map((t) => new TextRun({ text: t.text, font: "Consolas", size: 18, color: t.color })),
     shading: { type: ShadingType.CLEAR, fill: "1E1E1E" },
     spacing: { after: 16 },
   });
