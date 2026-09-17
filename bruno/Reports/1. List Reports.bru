@@ -1,0 +1,16 @@
+meta {
+  name: 1. List Reports
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/reports
+  body: none
+  auth: none
+}
+
+params:query {
+  ~reportType: LOST
+  ~status: OPEN
+}

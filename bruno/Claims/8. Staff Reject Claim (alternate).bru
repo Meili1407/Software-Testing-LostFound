@@ -1,0 +1,27 @@
+meta {
+  name: 8. Staff Reject Claim (alternate)
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{baseUrl}}/claims/{{claimId}}/decision
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+body:json {
+  {
+    "action": "REJECT"
+  }
+}
+
+docs {
+  Alternate branch — not part of the main golden-path sequence. Run this
+  instead of "6. Staff Approve Claim" to see both linked reports revert to
+  OPEN instead of moving toward RESOLVED.
+}

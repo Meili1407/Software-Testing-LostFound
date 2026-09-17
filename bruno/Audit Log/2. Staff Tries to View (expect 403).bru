@@ -1,0 +1,21 @@
+meta {
+  name: 2. Staff Tries to View (expect 403)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/audit-logs
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+tests {
+  test("status is 403 (admin-only)", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+}

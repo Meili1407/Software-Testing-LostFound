@@ -1,0 +1,124 @@
+
+> bad-project-backend@1.0.0 test:integration
+> tsx --test tests/integration/apiIntegration.test.js
+
+TAP version 13
+# [0mPOST /api/reports [32m201[0m 36.157 ms - 558[0m
+# [0mPOST /api/reports [32m201[0m 10.639 ms - 559[0m
+# [0mGET /api/reports/439aff37-f763-48db-aecc-e686062dc4ff/matches [32m200[0m 30.747 ms - 3431[0m
+# Subtest: IT-01: Report <-> Matching
+    # Subtest: creating a matching LOST/FOUND pair produces a scored, ranked candidate
+    ok 1 - creating a matching LOST/FOUND pair produces a scored, ranked candidate
+      ---
+      duration_ms: 97.043291
+      ...
+    1..1
+ok 1 - IT-01: Report <-> Matching
+  ---
+  duration_ms: 233.544166
+  type: 'suite'
+  ...
+# [0mPOST /api/reports/matches/decision [32m200[0m 9.141 ms - 293[0m
+# [0mGET /api/reports/439aff37-f763-48db-aecc-e686062dc4ff/matches [32m200[0m 2.179 ms - 3438[0m
+# Subtest: IT-02: Matching <-> MatchDecision
+    # Subtest: confirming a match persists and is reflected on the next fetch
+    ok 1 - confirming a match persists and is reflected on the next fetch
+      ---
+      duration_ms: 14.985666
+      ...
+    1..1
+ok 2 - IT-02: Matching <-> MatchDecision
+  ---
+  duration_ms: 15.188125
+  type: 'suite'
+  ...
+# (node:44712) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# [0mPOST /api/claims [32m201[0m 36.565 ms - 2061[0m
+# Subtest: IT-03: Matching <-> Claim
+    # Subtest: submitting a claim stores the matchScore computed at submission time
+    ok 1 - submitting a claim stores the matchScore computed at submission time
+      ---
+      duration_ms: 39.463
+      ...
+    1..1
+ok 3 - IT-03: Matching <-> Claim
+  ---
+  duration_ms: 39.73975
+  type: 'suite'
+  ...
+# [0mPATCH /api/claims/8c283c07-f83d-4e83-8d72-6bd08134094c/decision [32m200[0m 17.219 ms - 2482[0m
+# [0mGET /api/notifications [32m200[0m 7.242 ms - 4728[0m
+# Subtest: IT-04: Claim <-> Notification
+    # Subtest: approving a claim creates a notification for the claimant
+    ok 1 - approving a claim creates a notification for the claimant
+      ---
+      duration_ms: 28.465917
+      ...
+    1..1
+ok 4 - IT-04: Claim <-> Notification
+  ---
+  duration_ms: 28.664375
+  type: 'suite'
+  ...
+# [0mPATCH /api/claims/8c283c07-f83d-4e83-8d72-6bd08134094c/handover [32m200[0m 55.809 ms - 2538[0m
+# [0mGET /api/reports [32m200[0m 3.134 ms - 25711[0m
+# Subtest: IT-05: Claim <-> Report status
+    # Subtest: confirming handover moves both linked reports to RESOLVED
+    ok 1 - confirming handover moves both linked reports to RESOLVED
+      ---
+      duration_ms: 63.93925
+      ...
+    1..1
+ok 5 - IT-05: Claim <-> Report status
+  ---
+  duration_ms: 64.164709
+  type: 'suite'
+  ...
+# [0mGET /api/audit-logs [32m200[0m 8.011 ms - 25886[0m
+# Subtest: IT-06: Claim <-> AuditLog
+    # Subtest: every step of the claim lifecycle wrote an audit log entry
+    ok 1 - every step of the claim lifecycle wrote an audit log entry
+      ---
+      duration_ms: 14.320416
+      ...
+    1..1
+ok 6 - IT-06: Claim <-> AuditLog
+  ---
+  duration_ms: 14.441041
+  type: 'suite'
+  ...
+# [0mPATCH /api/claims/8c283c07-f83d-4e83-8d72-6bd08134094c/decision [33m403[0m 1.355 ms - 55[0m
+# Subtest: IT-07: Auth (actor) <-> Route access
+    # Subtest: a student cannot decide a claim (403)
+    ok 1 - a student cannot decide a claim (403)
+      ---
+      duration_ms: 3.233709
+      ...
+# [0mGET /api/audit-logs [33m403[0m 0.857 ms - 55[0m
+    # Subtest: staff cannot view the audit log (403, admin-only)
+    ok 2 - staff cannot view the audit log (403, admin-only)
+      ---
+      duration_ms: 2.063875
+      ...
+# [0mGET /api/audit-logs [32m200[0m 3.064 ms - 25886[0m
+    # Subtest: admin can view the audit log (200)
+    ok 3 - admin can view the audit log (200)
+      ---
+      duration_ms: 4.496708
+      ...
+    1..3
+ok 7 - IT-07: Auth (actor) <-> Route access
+  ---
+  duration_ms: 9.924209
+  type: 'suite'
+  ...
+1..7
+# tests 9
+# suites 7
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 978.687875

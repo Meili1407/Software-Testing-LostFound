@@ -1,0 +1,67 @@
+Reports/1. List Reports (200 OK) - 118 ms
+Reports/2. Create Lost Report (Student) (201 Created) - 18 ms
+Tests
+   ✓ status is 201
+   ✓ report is OPEN
+Reports/3. Create Found Report (Staff) (201 Created) - 15 ms
+Tests
+   ✓ status is 201
+Reports/4. Get Matches for Lost Report (200 OK) - 18 ms
+Tests
+   ✓ status is 200
+   ✓ found report appears as a candidate
+Reports/5. Confirm Match (Student) (200 OK) - 15 ms
+Tests
+   ✓ status is 200
+   ✓ decision is CONFIRMED
+Reports/6. Dismiss Match (Student) (200 OK) - 14 ms
+Claims/1. List Claims (200 OK) - 81 ms
+Claims/2. Submit Claim (Student) (201 Created) - 95 ms
+Tests
+   ✓ status is 201
+   ✓ claim starts PENDING
+Claims/3. Get Claim by ID (200 OK) - 15 ms
+Claims/4. Get Claim by Code (200 OK) - 27 ms
+Claims/5. Student Tries to Decide (expect 403) (403 Forbidden) - 6 ms
+Tests
+   ✓ status is 403 (students cannot decide claims)
+Claims/6. Staff Approve Claim (200 OK) - 50 ms
+Tests
+   ✓ status is 200
+   ✓ claim is APPROVED
+Claims/7. Confirm Handover (Staff) (200 OK) - 57 ms
+Tests
+   ✓ status is 200
+   ✓ claim is COMPLETED
+Claims/8. Staff Reject Claim (alternate) (200 OK) - 63 ms
+Claims/9. Staff Request More Info (alternate) (200 OK) - 27 ms
+Notifications/1. List Notifications (Student) (200 OK) - 16 ms
+Tests
+   ✓ status is 200
+Notifications/2. Mark All Read (Student) (200 OK) - 10 ms
+Audit Log/1. Get Audit Logs (Admin) (200 OK) - 63 ms
+Tests
+   ✓ status is 200
+Audit Log/2. Staff Tries to View (expect 403) (403 Forbidden) - 22 ms
+Tests
+   ✓ status is 403 (admin-only)
+Reference Data/1. List Categories (200 OK) - 19 ms
+Reference Data/2. List Users (200 OK) - 7 ms
+Reference Data/3. Health Check (200 OK) - 9 ms
+Tests
+   ✓ status is 200
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 22 (22 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     18/18      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │      2004      │
+└───────────────┴────────────────┘
