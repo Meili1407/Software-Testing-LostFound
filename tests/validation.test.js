@@ -62,7 +62,11 @@ describe("claimSubmissionSchema: Equivalence Partitioning (claim submission)", (
     return {
       lostReportId: VALID_UUID,
       foundReportId: VALID_UUID_2,
-      evidenceDescription: "The backpack has a torn front pocket and a keychain inside.",
+      evidence: [{
+        evidenceType: "PHOTO",
+        description: "A picture of my backpack",
+        url: "http://example.com/photo.jpg"
+      }],
       ...overrides,
     };
   }
@@ -71,8 +75,8 @@ describe("claimSubmissionSchema: Equivalence Partitioning (claim submission)", (
     expect(claimSubmissionSchema.safeParse(validClaim()).success).toBe(true);
   });
 
-  test("invalid partition: rejects evidenceDescription shorter than 10 characters", () => {
-    const result = claimSubmissionSchema.safeParse(validClaim({ evidenceDescription: "too short" }));
+  test("invalid partition: rejects evidence description shorter than 5 characters", () => {
+    const result = claimSubmissionSchema.safeParse(validClaim({ evidence: [{ evidenceType: "PHOTO", description: "too" }] }));
     expect(result.success).toBe(false);
   });
 
@@ -81,10 +85,25 @@ describe("claimSubmissionSchema: Equivalence Partitioning (claim submission)", (
     expect(result.success).toBe(false);
   });
 
-  test("invalid partition: rejects a missing evidenceDescription", () => {
-    const { evidenceDescription, ...rest } = validClaim();
+  test("invalid partition: rejects missing evidence array", () => {
+    const { evidence, ...rest } = validClaim();
     const result = claimSubmissionSchema.safeParse(rest);
     expect(result.success).toBe(false);
+  });
+
+  test("invalid partition: rejects invalid evidenceType", () => {
+    const result = claimSubmissionSchema.safeParse(validClaim({ evidence: [{ evidenceType: "INVALID_TYPE", description: "A description" }] }));
+    expect(result.success).toBe(false);
+  });
+
+  test("valid partition: accepts multiple evidence items", () => {
+    const result = claimSubmissionSchema.safeParse(validClaim({ 
+      evidence: [
+        { evidenceType: "PHOTO", description: "A picture of my backpack" },
+        { evidenceType: "RECEIPT", description: "Purchase receipt for the backpack" }
+      ]
+    }));
+    expect(result.success).toBe(true);
   });
 });
 

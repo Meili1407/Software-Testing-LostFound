@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1500" viewBox="0 0 1800 1500">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#000"/></marker>
+    <style>
+      .node { fill:#fff; stroke:#000; stroke-width:2.2; }
+      .edge { fill:none; stroke:#000; stroke-width:2; marker-end:url(#arrow); }
+      .n { font-family:Arial, Helvetica, sans-serif; font-size:19px; fill:#000; text-anchor:middle; }
+      .s { font-family:Arial, Helvetica, sans-serif; font-size:16px; fill:#000; text-anchor:middle; }
+      .l { font-family:Arial, Helvetica, sans-serif; font-size:17px; font-weight:bold; fill:#000; }
+    </style>
+  </defs>
+  <rect width="1800" height="1500" fill="#fff"/>
+  <text x="900" y="48" class="n" style="font-size:28px;font-weight:bold">Control Flow Graph of verifyOwnership(claim)</text>
+
+  <!-- Edges placed behind nodes -->
+  <path class="edge" d="M900 130 L900 170"/>
+  <path class="edge" d="M680 230 L310 230 L310 350"/><text x="492" y="218" class="l">T</text>
+  <path class="edge" d="M900 290 L900 345"/><text x="915" y="327" class="l">F</text>
+  <path class="edge" d="M900 455 L900 500"/><text x="915" y="483" class="l">T</text>
+  <path class="edge" d="M1120 400 L1700 400 L1700 1030 L1120 1030"/><text x="1715" y="710" class="l">F</text>
+  <path class="edge" d="M900 600 L250 680"/><text x="530" y="638" class="l">SERIAL_NUMBER</text>
+  <path class="edge" d="M900 600 L575 680"/><text x="702" y="638" class="l">RECEIPT</text>
+  <path class="edge" d="M900 600 L900 680"/><text x="915" y="645" class="l">PHOTO</text>
+  <path class="edge" d="M900 600 L1225 680"/><text x="1030" y="638" class="l">IDENTIFYING_MARKS</text>
+  <path class="edge" d="M900 600 L1550 680"/><text x="1335" y="638" class="l">default</text>
+  <path class="edge" d="M250 750 C70 810, 70 470, 680 400"/>
+  <path class="edge" d="M575 750 C360 840, 280 500, 680 420"/>
+  <path class="edge" d="M900 750 C760 830, 560 500, 700 430"/>
+  <path class="edge" d="M1225 750 C1450 840, 1510 500, 1120 420"/>
+  <path class="edge" d="M1550 750 C1730 810, 1730 470, 1120 400"/>
+  <text x="900" y="865" class="s">after each evidence item, loop back to the for condition</text>
+  <path class="edge" d="M900 1085 L650 1150"/><text x="745" y="1114" class="l">T</text>
+  <path class="edge" d="M900 1085 L1150 1150"/><text x="1040" y="1114" class="l">F</text>
+  <path class="edge" d="M650 1210 L900 1280"/>
+  <path class="edge" d="M1150 1210 L900 1280"/>
+  <path class="edge" d="M900 1340 L900 1380"/>
+  <path class="edge" d="M120 390 C25 430, 25 1440, 840 1440"/>
+
+  <!-- Nodes -->
+  <ellipse class="node" cx="900" cy="100" rx="190" ry="30"/>
+  <text x="900" y="95" class="n">1. Start / initialize</text><text x="900" y="117" class="s">score = 0; messages = []</text>
+
+  <polygon class="node" points="900,170 1120,230 900,290 680,230"/>
+  <text x="900" y="224" class="n">2. !claim.evidence ||</text><text x="900" y="247" class="n">claim.evidence.length === 0?</text>
+
+  <rect class="node" x="120" y="350" width="380" height="80"/>
+  <text x="310" y="377" class="n">3. Return { isSufficient: false, score: 0,</text><text x="310" y="401" class="n">messages: [No evidence provided.] }</text>
+
+  <polygon class="node" points="900,345 1120,400 900,455 680,400"/>
+  <text x="900" y="394" class="n">4. for (const ev of claim.evidence):</text><text x="900" y="416" class="n">another evidence item?</text>
+
+  <polygon class="node" points="900,500 1110,550 900,600 690,550"/>
+  <text x="900" y="557" class="n">5. switch (ev.evidenceType)</text>
+
+  <rect class="node" x="115" y="680" width="270" height="70"/>
+  <text x="250" y="708" class="n">6. SERIAL_NUMBER</text><text x="250" y="731" class="s">score += 50; add message</text>
+  <rect class="node" x="440" y="680" width="270" height="70"/>
+  <text x="575" y="708" class="n">7. RECEIPT</text><text x="575" y="731" class="s">score += 40; add message</text>
+  <rect class="node" x="765" y="680" width="270" height="70"/>
+  <text x="900" y="708" class="n">8. PHOTO</text><text x="900" y="731" class="s">score += 30; add message</text>
+  <rect class="node" x="1090" y="680" width="270" height="70"/>
+  <text x="1225" y="708" class="n">9. IDENTIFYING_MARKS</text><text x="1225" y="731" class="s">score += 20; add message</text>
+  <rect class="node" x="1415" y="680" width="270" height="70"/>
+  <text x="1550" y="708" class="n">10. default</text><text x="1550" y="731" class="s">add unknown-type message</text>
+
+  <polygon class="node" points="900,970 1120,1030 900,1090 680,1030"/>
+  <text x="900" y="1024" class="n">11. isSufficient =</text><text x="900" y="1047" class="n">(score &gt;= 50)?</text>
+  <rect class="node" x="460" y="1150" width="380" height="60"/>
+  <text x="650" y="1177" class="n">12. Add message: Evidence is sufficient (&gt;= 50)</text>
+  <rect class="node" x="960" y="1150" width="380" height="60"/>
+  <text x="1150" y="1177" class="n">13. Add message: Evidence is not sufficient (&lt; 50)</text>
+  <rect class="node" x="650" y="1280" width="500" height="60"/>
+  <text x="900" y="1316" class="n">14. Return { isSufficient, score, messages }</text>
+  <ellipse class="node" cx="900" cy="1410" rx="80" ry="30"/>
+  <text x="900" y="1417" class="n">15. Exit</text>
+</svg>
