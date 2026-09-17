@@ -1,0 +1,35 @@
+meta {
+  name: 7. Confirm Handover (Staff)
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/claims/{{claimId}}/handover
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+body:json {
+  {
+    "verifiedIdentity": true
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("claim is COMPLETED", function() {
+    expect(res.body.data.status).to.equal("COMPLETED");
+  });
+}
+
+docs {
+  Only works on a claim that is already APPROVED (run "6. Staff Approve
+  Claim" first), and only if verifiedIdentity is true.
+}

@@ -1,0 +1,19 @@
+meta {
+  name: 1. List Claims
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/claims
+  body: none
+  auth: none
+}
+
+headers {
+  x-user-id: {{staffId}}
+}
+
+params:query {
+  ~status: PENDING
+}

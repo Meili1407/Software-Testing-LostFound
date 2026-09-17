@@ -1,0 +1,32 @@
+meta {
+  name: 5. Confirm Match (Student)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/reports/matches/decision
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+body:json {
+  {
+    "lostReportId": "{{lostReportId}}",
+    "foundReportId": "{{foundReportId}}",
+    "decision": "CONFIRMED"
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("decision is CONFIRMED", function() {
+    expect(res.body.data.decision).to.equal("CONFIRMED");
+  });
+}

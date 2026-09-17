@@ -20,3 +20,6 @@ uploads/*
 
 report-assets/pdf-preview/
 report-assets/Software_Testing_Report.pdf
+report-assets/presentation/.venv/
+report-assets/presentation/*.pdf
+report-assets/presentation/slide-*.jpg

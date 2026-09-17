@@ -1,0 +1,39 @@
+meta {
+  name: 2. Submit Claim (Student)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/claims
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+body:json {
+  {
+    "lostReportId": "{{lostReportId}}",
+    "foundReportId": "{{foundReportId}}",
+    "evidenceDescription": "The backpack has a torn front pocket and a keychain inside that I put there."
+  }
+}
+
+script:post-response {
+  if (res.body.success) {
+    bru.setVar("claimId", res.body.data.id);
+    bru.setVar("claimCode", res.body.data.code);
+  }
+}
+
+tests {
+  test("status is 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  test("claim starts PENDING", function() {
+    expect(res.body.data.status).to.equal("PENDING");
+  });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: 5. Student Tries to Decide (expect 403)
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/claims/{{claimId}}/decision
+  body: json
+  auth: none
+}
+
+headers {
+  x-user-id: {{studentId}}
+}
+
+body:json {
+  {
+    "action": "APPROVE"
+  }
+}
+
+tests {
+  test("status is 403 (students cannot decide claims)", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+}
