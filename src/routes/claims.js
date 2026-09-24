@@ -5,6 +5,7 @@ const { authContext, requireRole } = require("../middleware/authContext");
 const { claimSubmissionSchema, claimDecisionSchema } = require("../validation/claimSchema");
 const { calculateMatchScore, classifyScore } = require("../services/matchingService");
 const { decideClaim, canConfirmHandover } = require("../services/claimService");
+const { verifyOwnership } = require("../claims/verifyOwnership");
 const { NOTIFICATION_TYPE, buildNotificationMessage } = require("../services/notificationService");
 const { formatClaimCode, parseClaimCode } = require("../utils/claimCode");
 const ValidationError = require("../errors/ValidationError");
@@ -70,7 +71,7 @@ router.post("/", authContext, async (req, res, next) => {
       );
     }
 
-    const { lostReportId, foundReportId, evidenceDescription } = parsed.data;
+    const { lostReportId, foundReportId, evidence } = parsed.data;
 
     const [lostReport, foundReport] = await Promise.all([
       prisma.itemReport.findUnique({ where: { id: lostReportId } }),
@@ -83,13 +84,27 @@ router.post("/", authContext, async (req, res, next) => {
 
     const { score } = calculateMatchScore(lostReport, foundReport);
 
+    const ownershipResult = verifyOwnership({ evidence });
+    const ownershipScore = ownershipResult.score;
+
+    // Preserve evidenceDescription for backward compatibility
+    const combinedDescription = evidence.map(e => `[${e.evidenceType}] ${e.description}`).join("\n");
+
     const claim = await prisma.claim.create({
       data: {
         lostReportId,
         foundReportId,
         claimantId: req.user.id,
-        evidenceDescription,
+        evidenceDescription: combinedDescription,
         matchScore: score,
+        ownershipScore,
+        evidence: {
+          create: evidence.map(e => ({
+            evidenceType: e.evidenceType,
+            description: e.description,
+            url: e.url
+          }))
+        }
       },
       include: claimInclude,
     });

@@ -504,6 +504,37 @@ const CFG_FUNCTIONS = [
       ["5", "{}", "{}"],
     ],
   },
+  {
+    name: "verifyOwnership(claim)",
+    file: "verifyOwnership.png",
+    module: "verifyOwnership.js",
+    branchCoverage: [
+      "P1: 1-2(T)-3-15",
+      "P2: 1-2(F)-4(F)-11(F)-13-14-15 (theoretical/infeasible basis path for non-empty evidence)",
+      "P3: 1-2(F)-4(T)-5(SERIAL_NUMBER)-6-4(F)-11(T)-12-14-15",
+      "P4: 1-2(F)-4(T)-5(RECEIPT)-7-4(F)-11(F)-13-14-15",
+      "P5: 1-2(F)-4(T)-5(PHOTO)-8-4(F)-11(F)-13-14-15",
+      "P6: 1-2(F)-4(T)-5(IDENTIFYING_MARKS)-9-4(F)-11(F)-13-14-15",
+      "P7: 1-2(F)-4(T)-5(default)-10-4(F)-11(F)-13-14-15",
+      "P8: 1-2(F)-4(T)-5(SERIAL_NUMBER)-6-4(T)-5(RECEIPT)-7-4(F)-11(T)-12-14-15"
+    ],
+    predicateUse: [
+      ["(2,3)", "!claim.evidence || claim.evidence.length === 0", "True", "{claim.evidence}"],
+      ["(2,4)", "!claim.evidence || claim.evidence.length === 0", "False", "{claim.evidence}"],
+      ["(4,5)", "for (const ev of claim.evidence)", "True", "{claim.evidence}"],
+      ["(4,11)", "for (const ev of claim.evidence)", "False", "{claim.evidence}"],
+      ["(11,12)", "score >= 50", "True", "{score}"],
+      ["(11,13)", "score >= 50", "False", "{score}"]
+    ],
+    defCUse: [
+      ["1", "{score, messages}", "{}"],
+      ["6", "{score, messages}", "{score}"],
+      ["7", "{score, messages}", "{score}"],
+      ["8", "{score, messages}", "{score}"],
+      ["9", "{score, messages}", "{score}"],
+      ["11", "{}", "{score}"]
+    ]
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -1417,8 +1448,10 @@ unitSection({
 });
 
 children.push(h2("Overall Unit Testing Result"));
-children.push(...codeBlock(["$ npm test", "Test Suites: 4 passed, 4 total", "Tests:       91 passed, 91 total", "Snapshots:   0 total", "Time:        0.43 s"]));
-children.push(p("All 91 unit tests pass across matchingService.test.js (50), claimService.test.js (17), validation.test.js (17), and notificationService.test.js (7)."));
+children.push(...codeBlock(["$ npm test", "Test Suites: 5 passed, 5 total", "Tests:       99 passed, 99 total", "Snapshots:   0 total", "Time:        0.43 s"]));
+children.push(p("All 99 unit tests pass across matchingService.test.js (50), claimService.test.js (17), validation.test.js (17), verifyOwnership.test.js (8), and notificationService.test.js (7)."));
+children.push(p("verifyOwnership.js coverage: 100% Statements, 100% Branches, 100% Functions, 100% Lines."));
+children.push(p("Overall project coverage: 100% Statements, 98.16% Branches, 100% Functions, 100% Lines.", { bold: true }));
 
 // ---------------------------------------------------------------------------
 // Control Flow Testing
@@ -1827,15 +1860,15 @@ children.push(new Paragraph({ children: [new PageBreak()] }));
 children.push(h1("Summary"));
 children.push(
   p(
-    "91 unit tests, 38 independent control-flow paths across 9 functions, 13 domain test cases, 7 automated integration scenarios (via tsx --test against the live API and database), and a Bruno-based access-control test collection were executed against the running system. All results matched expectations. The rule-based matching engine, claim decision logic, and handover eligibility check — the modules identified as highest-risk in the project proposal because of their branching complexity — are fully covered by static analysis (CFG/DFG), automated integration tests, and live, screenshot-based evidence from the running application."
+    "99 unit tests, 46 independent control-flow paths across 10 functions, 13 domain test cases, 7 automated integration scenarios (via tsx --test against the live API and database), and a Bruno-based access-control test collection were executed against the running system. All results matched expectations. The rule-based matching engine, claim decision logic, handover eligibility check, and ownership verification — the modules identified as highest-risk in the project proposal because of their branching complexity — are fully covered by static analysis (CFG/DFG), automated integration tests, and live, screenshot-based evidence from the running application."
   )
 );
 
 children.push(h2("Final Test Execution Results"));
 const finalResultsRows = [
-  ["Unit Testing", "91", "91", "0", "npx jest — see Unit Testing section"],
-  ["Control Flow Testing", "38 independent paths (9 functions)", "38", "0", "All CFG paths mapped to executed unit tests"],
-  ["Data Flow Testing", "9 functions (def/c-use/p-use)", "9", "0", "All DU-pairs exercised by the same unit tests"],
+  ["Unit Testing", "99", "99", "0", "npx jest — see Unit Testing section"],
+  ["Control Flow Testing", "46 independent paths (10 functions)", "46", "0", "All CFG paths mapped to executed unit tests"],
+  ["Data Flow Testing", "10 functions (def/c-use/p-use)", "10", "0", "All DU-pairs exercised by the same unit tests"],
   ["Domain Testing", "13", "13", "0", "Manual walkthrough against the running app"],
   ["Integration Testing", "7 (TC-IT-001..007, incl. 3 sub-checks in TC-IT-007)", "7", "0", "npm run test:integration — automated, reproducible"],
   ["Access Control Testing", "4 (TC-AC-001..004) + 2 Bruno 403 checks", "6", "0", "Integration suite TC-IT-007 + Bruno collection"],
@@ -1850,8 +1883,8 @@ children.push(
 children.push(p(""));
 children.push(...codeBlock([
   "$ npm test",
-  "Test Suites: 4 passed, 4 total",
-  "Tests:       91 passed, 91 total",
+  "Test Suites: 5 passed, 5 total",
+  "Tests:       99 passed, 99 total",
   "",
   "$ npm run test:integration",
   "# tests 9",

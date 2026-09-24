@@ -34,6 +34,7 @@ enum ClaimStatus {
   REJECTED
   INFO_REQUESTED
   COMPLETED
+  MORE_INFORMATION_REQUIRED
 }
 
 enum AuditAction {
@@ -46,6 +47,13 @@ enum AuditAction {
 enum MatchDecisionType {
   CONFIRMED
   DISMISSED
+}
+
+enum EvidenceType {
+  PHOTO
+  RECEIPT
+  SERIAL_NUMBER
+  IDENTIFYING_MARKS
 }
 
 enum NotificationType {
@@ -73,6 +81,8 @@ model User {
   microsoftOid String?  @unique
   passwordHash String?
   isActive     Boolean  @default(true)
+  tokenVersion Int? @default(0)
+  username String? @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -114,6 +124,12 @@ model ItemReport {
   brand       String?
   photoUrl    String?
   isPublic    Boolean      @default(true)
+  embedding Json?
+  embeddingError String?
+  embeddingFingerprint String?
+  embeddingModel String?
+  embeddingStatus EmbeddingStatus? @default(PENDING)
+  embeddingUpdatedAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -160,7 +176,8 @@ model Claim {
   claimNumber              Int         @unique @default(autoincrement())
   status                   ClaimStatus @default(PENDING)
   matchScore               Int
-  evidenceDescription      String      @db.Text
+  ownershipScore           Int?
+  evidenceDescription      String?     @db.Text
   staffVerifiedEvidence    Boolean     @default(false)
   decisionReason           String?     @db.Text
   handoverVerifiedIdentity Boolean     @default(false)
@@ -183,11 +200,25 @@ model Claim {
 
   auditLogs     AuditLog[]
   notifications Notification[]
+  evidence      Evidence[]
 
   @@index([lostReportId])
   @@index([foundReportId])
   @@index([claimantId])
   @@index([status])
+}
+
+model Evidence {
+  id           String       @id @default(uuid()) @db.Uuid
+  evidenceType EvidenceType
+  description  String       @db.Text
+  url          String?
+  createdAt    DateTime     @default(now())
+
+  claimId String @db.Uuid
+  claim   Claim  @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@index([claimId])
 }
 
 model Notification {
@@ -211,9 +242,13 @@ model Notification {
 
 model AuditLog {
   id        String      @id @default(uuid()) @db.Uuid
-  action    AuditAction
+  action    String
   metadata  Json?
   createdAt DateTime    @default(now())
+  entityType String?
+  entityId String? @db.Uuid
+  details Json?
+  actorUserId String? @db.Uuid
 
   actorId String? @db.Uuid
   claimId String? @db.Uuid
@@ -224,4 +259,115 @@ model AuditLog {
   @@index([actorId])
   @@index([claimId])
   @@index([action])
+}
+
+enum EmbeddingStatus {
+  PENDING
+  READY
+  FAILED
+}
+
+enum MatchConfidence {
+  HIGH
+  POSSIBLE
+}
+
+enum MatchStatus {
+  SUGGESTED
+  CONFIRMED
+  REJECTED
+  CLAIMED
+  RESOLVED
+}
+
+model ClaimRequest {
+  id                                       String          @id @db.Uuid
+  status                                   ClaimStatus     @default(PENDING)
+  identifyingDetails                       String
+  reviewNote                               String?
+  createdAt                                DateTime        @default(now())
+  updatedAt                                DateTime
+  claimantUserId                           String          @db.Uuid
+  foundReportId                            String          @db.Uuid
+  reviewedByUserId                         String?         @db.Uuid
+}
+
+model ClaimEvidence {
+  id             String       @id @db.Uuid
+  evidenceType   String
+  textValue      String?
+  objectKey      String?      @unique
+  mimeType       String?
+  fileSize       Int?
+  createdAt      DateTime     @default(now())
+  claimRequestId String       @db.Uuid
+}
+
+model ItemImage {
+  id         String     @id @db.Uuid
+  objectKey  String     @unique
+  mimeType   String
+  fileSize   Int
+  createdAt  DateTime   @default(now())
+  reportId   String     @db.Uuid
+}
+
+model MatchSuggestion {
+  id                                                   String          @id @db.Uuid
+  matchSource                                          String          @default("AI_ASSISTED")
+  createdAt                                            DateTime        @default(now())
+  lostReportId                                         String          @db.Uuid
+  foundReportId                                        String          @db.Uuid
+  categoryScore                                        Float
+  colorScore                                           Float
+  confidence                                           MatchConfidence
+  dateScore                                            Float
+  descriptionSimilarityScore                           Float
+  locationScore                                        Float
+  reasons                                              Json
+  reviewedAt                                           DateTime?
+  reviewerId                                           String?         @db.Uuid
+  status                                               MatchStatus     @default(SUGGESTED)
+  totalScore                                           Float
+  updatedAt                                            DateTime
+}
+
+model PartnerClient {
+  id                String              @id @db.Uuid
+  name              String              @unique
+  description       String?
+  baseUrl           String
+  apiKeyIdentifier  String              @unique
+  apiKeyHash        String
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+}
+
+model PartnerSyncEvent {
+  id               String        @id @db.Uuid
+  operation        String
+  receivedCount    Int
+  createdCount     Int
+  updatedCount     Int
+  deactivatedCount Int
+  createdAt        DateTime      @default(now())
+  partnerId        String        @db.Uuid
+}
+
+model PartnerSyncedItem {
+  id              String        @id @db.Uuid
+  externalId      String
+  title           String
+  category        String?
+  location        String
+  occurredAt      DateTime
+  status          String        @default("OPEN")
+  sourceUrl       String?
+  remoteUpdatedAt DateTime?
+  lastSyncedAt    DateTime      @default(now())
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime
+  partnerId       String        @db.Uuid
 }

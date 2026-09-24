@@ -1,0 +1,60 @@
+digraph verifyOwnershipCFG {
+  graph [
+    label="Control Flow Graph of verifyOwnership(claim)",
+    labelloc=t,
+    fontsize=22,
+    fontname="Helvetica",
+    bgcolor="white",
+    pad="0.35",
+    nodesep="0.42",
+    ranksep="0.58",
+    splines=polyline
+  ];
+  rankdir=TB;
+  node [fontname="Helvetica", fontsize=11, color="black", fontcolor="black", penwidth=1.25, margin="0.13,0.08"];
+  edge [fontname="Helvetica", fontsize=10, color="black", fontcolor="black", penwidth=1.1, arrowsize=0.75];
+
+  N1  [shape=ellipse, label="1. Start / initialize\nscore = 0; messages = []"];
+  N2  [shape=diamond, label="2. !claim.evidence ||\nclaim.evidence.length === 0?"];
+  N3  [shape=box, label="3. Return { isSufficient: false,\nscore: 0, messages: [No evidence provided.] }"];
+  N4  [shape=diamond, label="4. for (const ev of claim.evidence):\nanother evidence item?"];
+  N5  [shape=diamond, label="5. switch (ev.evidenceType)"];
+  N6  [shape=box, label="6. SERIAL_NUMBER\nscore += 50; add message"];
+  N7  [shape=box, label="7. RECEIPT\nscore += 40; add message"];
+  N8  [shape=box, label="8. PHOTO\nscore += 30; add message"];
+  N9  [shape=box, label="9. IDENTIFYING_MARKS\nscore += 20; add message"];
+  N10 [shape=box, label="10. default\nadd unknown-type message"];
+  N11 [shape=diamond, label="11. isSufficient = (score >= 50)?"];
+  N12 [shape=box, label="12. Add message:\nEvidence is sufficient (>= 50)"];
+  N13 [shape=box, label="13. Add message:\nEvidence is not sufficient (< 50)"];
+  N14 [shape=box, label="14. Return { isSufficient, score, messages }"];
+  N15 [shape=ellipse, label="15. Exit"];
+
+  N1 -> N2;
+  N2 -> N3 [label="T"];
+  N2 -> N4 [label="F"];
+  N3 -> N15;
+  N4 -> N5 [label="T"];
+  N4 -> N11 [label="F"];
+
+  N5 -> N6  [label="SERIAL_NUMBER"];
+  N5 -> N7  [label="RECEIPT"];
+  N5 -> N8  [label="PHOTO"];
+  N5 -> N9  [label="IDENTIFYING_MARKS"];
+  N5 -> N10 [label="default"];
+  N6  -> N4;
+  N7  -> N4;
+  N8  -> N4;
+  N9  -> N4;
+  N10 -> N4;
+
+  N11 -> N12 [label="T"];
+  N11 -> N13 [label="F"];
+  N12 -> N14;
+  N13 -> N14;
+  N14 -> N15;
+
+  { rank=same; N3; N4; }
+  { rank=same; N6; N7; N8; N9; N10; }
+  { rank=same; N12; N13; }
+}

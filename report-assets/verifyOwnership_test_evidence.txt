@@ -1,0 +1,24 @@
+npm notice run bad-project-backend@1.0.0 npx
+npm notice run 'jest' tests/claims/verifyOwnership.test.js --coverage
+PASS tests/claims/verifyOwnership.test.js
+  verifyOwnership
+    ✓ should return false for no evidence (7 ms)
+    ✓ should return true for SERIAL_NUMBER evidence (1 ms)
+    ✓ should return true for combined PHOTO and IDENTIFYING_MARKS (50 pts)
+    ✓ should return false for only IDENTIFYING_MARKS (20 pts)
+    ✓ should return false for only RECEIPT (40 pts) - Boundary Value Analysis (5 ms)
+    ✓ should return false for only PHOTO (30 pts)
+    ✓ should return true for RECEIPT and PHOTO (> 50 pts) - Boundary Value Analysis (1 ms)
+    ✓ should not crash and award 0 points for unknown evidence type
+
+--------------------|---------|----------|---------|---------|-------------------
+File                | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+--------------------|---------|----------|---------|---------|-------------------
+All files           |     100 |      100 |     100 |     100 |                   
+ verifyOwnership.js |     100 |      100 |     100 |     100 |                   
+--------------------|---------|----------|---------|---------|-------------------
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+Snapshots:   0 total
+Time:        0.867 s, estimated 1 s
+Ran all test suites matching tests/claims/verifyOwnership.test.js.
